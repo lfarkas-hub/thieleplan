@@ -1,0 +1,2789 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aufmaß</title>
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --card:#FFFFFF;
+    --ink:#1C1E26;
+    --ink-soft:#565A66;
+    --ink-faint:#8A8E99;
+    --line:#E7E2D7;
+    --line-soft:#F0ECE2;
+    --accent:#E6B22C;       /* Zollstock-Gelb */
+    --accent-deep:#B98707;
+    --accent-tint:#FBF1D6;
+    --ok:#2E7D5B;
+    --ok-tint:#E3F1EA;
+    --warn:#C5790E;
+    --warn-tint:#FBEFD9;
+    --info:#2A6FB0;
+    --info-tint:#E4EEF7;
+    --bad:#C0392B;
+    --bad-tint:#F7E4E2;
+    --grey-tint:#EFECE4;
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow:0 1px 2px rgba(28,30,38,.05),0 8px 24px rgba(28,30,38,.06);
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    background:var(--paper);
+    font-size:16px;
+    line-height:1.45;
+    -webkit-text-size-adjust:100%;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+
+  /* ---------- Top bar ---------- */
+  header.app{
+    position:sticky;top:0;z-index:30;
+    background:var(--ink);color:#fff;
+    padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .brand .mark{
+    width:30px;height:30px;border-radius:8px;flex:none;
+    background:var(--accent);position:relative;
+  }
+  .brand .mark::before,.brand .mark::after{
+    content:"";position:absolute;background:var(--ink);
+  }
+  .brand .mark::before{left:6px;right:6px;top:9px;height:2px}
+  .brand .mark::after{left:6px;right:6px;top:18px;height:2px}
+  .brand .t{min-width:0}
+  .brand .t b{font-size:15px;display:block;line-height:1.1}
+  .brand .t span{font-size:12px;color:#C9CBD2;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  header.app .spacer{flex:1}
+  .hbtn{width:34px;height:34px;border-radius:8px;border:1px solid #3a3d49;background:transparent;color:#fff;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .hbtn:hover{background:#2a2d39}
+  .hbtn:disabled{opacity:.32;cursor:default}
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    position:sticky;top:var(--h-header,52px);z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    display:flex;gap:2px;padding:0 8px;overflow-x:auto;
+  }
+  nav.tabs button{
+    border:none;background:none;color:var(--ink-soft);
+    padding:13px 14px 11px;font-weight:600;font-size:15px;
+    border-bottom:2.5px solid transparent;white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--ink);border-bottom-color:var(--accent)}
+
+  main{max-width:980px;margin:0 auto;padding:16px 14px 64px}
+  .view{display:none}
+  .view.active{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ---------- Building blocks ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+  .card h2{font-size:17px;margin-bottom:4px}
+  .card .sub{color:var(--ink-soft);font-size:13.5px;margin-bottom:12px}
+  .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin:22px 4px 8px}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);
+    padding:10px 14px;border-radius:var(--radius-sm);font-weight:600;font-size:14.5px;
+    min-height:42px;transition:.12s;
+  }
+  .btn:hover{border-color:var(--ink-faint)}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#1C1E26}
+  .btn.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+  .btn.ghost{background:transparent}
+  .btn.danger{color:var(--bad);border-color:var(--bad-tint)}
+  .btn.danger:hover{background:var(--bad-tint);border-color:var(--bad)}
+  .btn.sm{min-height:34px;padding:6px 10px;font-size:13px}
+  .btn.block{width:100%}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap}
+  .assign-row{display:flex;gap:8px}
+  .assign-row .btn{flex:1;justify-content:flex-start;text-align:left;min-width:0}
+  .assign-row .btn:last-child{flex:none;justify-content:center}
+  .assign-row .btn.chosen{background:var(--info-tint);border-color:var(--info);color:var(--info);font-weight:600}
+  .assign-row .btn.nachtrag-on{background:var(--accent-tint);border-color:var(--accent-deep);color:var(--accent-deep)}
+
+  label.fld{display:block;margin-bottom:11px}
+  label.fld>span,.fld>.fld-label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:5px}
+  .ipt{
+    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);
+    background:#fff;outline:none;transition:.12s;
+  }
+  .ipt:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+  textarea.ipt{resize:vertical;min-height:46px}
+  .num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  /* ---------- Badges ---------- */
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap}
+  .b-ok{background:var(--ok-tint);color:var(--ok)}
+  .b-warn{background:var(--warn-tint);color:var(--warn)}
+  .b-info{background:var(--info-tint);color:var(--info)}
+  .b-bad{background:var(--bad-tint);color:var(--bad)}
+  .b-grey{background:var(--grey-tint);color:var(--ink-soft)}
+  .b-manuell{background:var(--accent-tint);color:var(--accent-deep)}
+
+  /* ---------- LV table ---------- */
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+  table.lv{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+  table.lv th,table.lv td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  table.lv th{position:sticky;top:0;background:#FBFAF6;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);z-index:1}
+  table.lv td.r,table.lv th.r{text-align:right;white-space:nowrap}
+  table.lv tr:last-child td{border-bottom:none}
+  table.lv tr.row-tap:hover{background:#FCFBF7}
+  .oz{font-family:var(--mono);font-size:13px;color:var(--ink-soft);white-space:nowrap}
+  .kt{font-weight:600}
+  .lt{color:var(--ink-faint);font-size:12.5px;margin-top:2px;max-width:360px}
+
+  /* ---------- Aufmaß list ---------- */
+  .auf-group{margin-bottom:18px}
+  .auf-group>h3{font-size:14px;color:var(--ink-soft);margin:0 4px 8px;display:flex;align-items:center;gap:8px}
+  .auf-group>h3 .cnt{font-weight:600;color:var(--ink-faint);font-size:12.5px}
+  .auf-row{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);
+    padding:11px 12px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:border-color .12s;
+  }
+  .auf-row:hover{border-color:var(--ink-faint)}
+  .auf-row.unassigned{border-color:var(--warn);background:var(--warn-tint)}
+  .auf-main{flex:1;min-width:0}
+  .auf-main .name{font-weight:600}
+  .auf-main .meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px;display:flex;flex-wrap:wrap;gap:4px 10px}
+  .auf-rooms{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  .auf-rooms .rm{display:inline-flex;align-items:baseline;gap:5px;background:var(--grey-tint);border-radius:7px;padding:3px 8px;font-size:12.5px}
+  .auf-rooms .rm b{font-weight:700;font-family:var(--mono);font-size:12.5px}
+  .auf-rooms .rm.noroom{background:var(--warn-tint);color:var(--warn)}
+  .eroom{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+  .eroom .eroom-raum{flex:1.3;min-width:0}
+  .eroom .eroom-formel{flex:1;min-width:0}
+  .eroom .eroom-res{font-family:var(--mono);font-size:13px;color:var(--ink-soft);white-space:nowrap;min-width:52px;text-align:right}
+  .eroom-vor{flex:0 0 auto;min-width:48px;text-align:right;font-family:var(--mono);font-size:13px;color:var(--ink-faint,#9aa0aa);background:var(--grey-tint,#f1f2f4);border-radius:6px;padding:6px 8px}
+  .eroom.korr .eroom-raum{flex:1.1}
+  .eroom.korr .eroom-formel{flex:1}
+  .eroom-head{display:flex;gap:6px;font-size:11px;color:var(--ink-faint,#9aa0aa);font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+  .eroom-head .rc{flex:1.1}.eroom-head .vc{flex:0 0 48px;text-align:right}.eroom-head .nc{flex:1}
+  .eroom-total{display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+  .eroom-total .q{font-family:var(--mono)}
+  .mlrow{display:flex;align-items:center;gap:10px;padding:9px 8px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+  .mlrow input{width:20px;height:20px;flex:none}
+  .mlrow .oz{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);min-width:54px}
+  .mlrow .kt{flex:1;min-width:0}
+  .mlrow .eh{font-size:12.5px;color:var(--ink-soft)}
+  .mlrow.has{opacity:.55}
+  .aufgrp{margin-bottom:14px}
+  .aufgrp-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;background:var(--ink);color:#fff;border-radius:10px;cursor:pointer;position:sticky;top:0}
+  .aufgrp-h .nm{font-weight:700}
+  .aufgrp-h .cnt{font-size:12.5px;opacity:.8}
+  .aufgrp-empty{padding:10px 12px;color:var(--ink-faint);font-size:13px}
+  .auf-row.mini{cursor:pointer}
+  .auf-row.mini .auf-main .name{font-size:14px}
+  .locked-form{opacity:.5;pointer-events:none;filter:grayscale(.3)}
+  .lockbanner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 13px;border-radius:11px;margin-bottom:12px;font-size:13.5px}
+  .lockbanner.ro{background:var(--info-tint,#eef2ff);border:1px solid var(--info,#5b6cff);color:var(--info,#3a44c4)}
+  .lockbanner.korr{background:var(--warn-tint,#fff3e0);border:1px solid var(--warn,#e08600);color:var(--warn,#a85c00)}
+  .lockbanner.open{background:var(--grey-tint,#f3f4f6);border:1px solid var(--line);color:var(--ink-soft)}
+  .lockbanner b{font-weight:700}
+  .lockbanner .btn{margin-left:auto}
+  .auf-row.changed{border-left:3px solid var(--warn,#e08600);background:var(--warn-tint,#fff8ef)}
+  .korr-note{font-size:12px;color:var(--warn,#a85c00);margin-top:5px;display:flex;gap:6px;flex-wrap:wrap}
+  .korr-note .old{text-decoration:line-through;color:var(--ink-faint)}
+  .rep-korr{font-size:12.5px;color:var(--warn,#a85c00);background:var(--warn-tint,#fff8ef);border-left:3px solid var(--warn,#e08600);padding:4px 8px;margin:4px 0;border-radius:4px}
+  .rep-titel{font-weight:700;font-size:14px;margin:14px 0 6px;padding:7px 10px;background:#eef0f4;border-left:6px solid #bbb;border-radius:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .klaerbox{border:1.5px solid var(--bad,#d23b3b);background:var(--bad-tint,#fff0f0);border-radius:12px;padding:11px 13px;margin-bottom:12px}
+  .klaerhd{font-weight:700;color:var(--bad,#c22);margin-bottom:8px;font-size:13.5px}
+  .klaer-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid rgba(0,0,0,.07)}
+  .klaer-item .ki-main{flex:1;min-width:0;font-size:13px}
+  .klaer-item .ki-auf{color:var(--ink-soft);font-size:12px}
+  .klaer-item .ki-grund{color:var(--bad,#a22);font-size:12.5px;margin-top:2px}
+  .klaer-item .ki-acts{display:flex;gap:6px;flex:none}
+  .chkline{display:flex;align-items:center;gap:8px;font-size:13.5px;margin:2px 0 10px;cursor:pointer}
+  .chkline input{width:19px;height:19px}
+  table.lv tr.lv-titel td{background:var(--grey-tint,#eef0f4);font-weight:700;color:var(--ink);padding:9px 10px;border-top:2px solid var(--line);font-size:13.5px}
+  table.lv .lt-full{white-space:pre-line;font-weight:500;font-size:13px;line-height:1.45}
+  table.lv tr.match td{background:#fff7cc}
+  table.lv tr.match-current td{background:#ffe066;box-shadow:inset 3px 0 0 #f59e0b}
+  .pick .pl,.mlrow .pl{display:block;white-space:pre-line;font-weight:400;font-size:12px;color:var(--ink-soft,#667);margin-top:3px;line-height:1.4}
+  .auf-subteil{font-size:12.5px;font-weight:700;color:var(--accent-deep,#2563eb);margin:8px 0 4px 2px}
+  .pk-titel{font-weight:700;font-size:12.5px;color:var(--ink);background:var(--grey-tint,#eef0f4);padding:6px 9px;border-radius:6px;margin:8px 0 4px;position:sticky;top:0}
+  .korr-grid{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
+  .seg{display:flex;gap:6px}
+  .seg-btn{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);font-weight:600;font-size:13px;cursor:pointer;color:var(--ink)}
+  .seg-btn.on{background:var(--accent-deep,#2563eb);color:#fff;border-color:var(--accent-deep,#2563eb)}
+  .card.frame-active{border:2px solid var(--brand,#4f7cff);box-shadow:0 2px 14px rgba(79,124,255,.10)}
+  .frame-sep{height:1px;background:var(--line);margin:16px 0}
+  .subhead{font-weight:700;font-size:15px;margin:0 0 8px}
+  .listrow.archived{opacity:.55}
+  .badge.b-arch{background:#6b7280;color:#fff}
+  .auf-main .meta .lvref{color:var(--info);font-family:var(--mono);font-size:12px}
+  .auf-qty{text-align:right;white-space:nowrap;font-family:var(--mono);font-weight:700;font-size:15px}
+  .auf-qty small{display:block;font-family:var(--sans);font-weight:600;color:var(--ink-faint);font-size:11px}
+  .auf-acts{display:flex;flex-direction:column;gap:6px}
+
+  .iconbtn{border:1px solid var(--line);background:#fff;border-radius:8px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:15px;flex:none}
+  .iconbtn:hover{border-color:var(--ink-faint);color:var(--ink)}
+  .iconbtn.del:hover{color:var(--bad);border-color:var(--bad)}
+
+  .empty{text-align:center;color:var(--ink-faint);padding:34px 16px}
+  .empty .big{font-size:30px;margin-bottom:8px}
+  .empty p{margin:6px 0}
+
+  /* ---------- Stats ---------- */
+  .stats{display:flex;gap:10px;flex-wrap:wrap}
+  .stat{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 14px}
+  .stat .v{font-size:24px;font-weight:700;font-family:var(--mono)}
+  .stat .l{font-size:12px;color:var(--ink-soft);font-weight:600}
+
+  /* project / template list */
+  .listrow{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line-soft)}
+  .listrow:last-child{border-bottom:none}
+  .listrow .info{flex:1;min-width:0}
+  .listrow .info b{font-weight:600}
+  .listrow .info .x{font-size:12.5px;color:var(--ink-faint)}
+  .listrow.cur{background:var(--accent-tint);border-radius:var(--radius-sm);padding:12px;border-bottom:none;border:1px solid var(--accent)}
+
+  /* ---------- Modal ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(28,30,38,.45);z-index:50;display:none;align-items:flex-end;justify-content:center;padding:0}
+  .modal-bg.open{display:flex}
+  @media(min-width:620px){.modal-bg{align-items:center;padding:20px}}
+  .modal{
+    background:var(--paper);width:100%;max-width:620px;max-height:92vh;overflow:auto;
+    border-radius:18px 18px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);
+    padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+    animation:slideup .22s ease;
+  }
+  @media(min-width:620px){.modal{border-radius:18px;animation:pop .18s ease}}
+  @keyframes slideup{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+  @keyframes pop{from{transform:scale(.97);opacity:.6}to{transform:none;opacity:1}}
+  .modal h2{font-size:18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+  .modal .close{border:none;background:var(--grey-tint);width:32px;height:32px;border-radius:99px;font-size:18px;color:var(--ink-soft)}
+
+  /* picker list */
+  .picker-search{position:sticky;top:0;background:var(--paper);padding-bottom:8px}
+  .pick{display:flex;align-items:center;gap:10px;padding:11px 10px;border:1px solid var(--line);background:#fff;border-radius:var(--radius-sm);margin-bottom:7px;width:100%;text-align:left}
+  .pick:hover{border-color:var(--accent)}
+  .pick.sel{border-color:var(--accent);background:var(--accent-tint)}
+  .pick .pz{font-family:var(--mono);font-size:12px;color:var(--ink-soft);flex:none}
+  .pick .pn{flex:1;min-width:0;font-weight:600;font-size:14px}
+  .pick .pe{font-size:12px;color:var(--ink-faint);flex:none}
+
+  .hint{font-size:12.5px;color:var(--ink-faint);margin-top:6px}
+  .mapgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin:8px 0}
+  .mapgrid label{font-weight:600;font-size:13.5px;color:var(--ink-soft)}
+  .filechip{display:inline-flex;align-items:center;gap:8px;background:var(--accent-tint);color:var(--accent-deep);padding:6px 10px;border-radius:8px;font-size:13px;font-weight:600}
+
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:80;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  .toast-act{background:var(--accent);color:#1C1E26;border:none;border-radius:99px;padding:5px 12px;font-weight:700;font-size:13.5px;margin-left:6px;cursor:pointer}
+
+  .filterbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;position:sticky;top:calc(var(--h-header,52px) + var(--h-nav,46px));z-index:15;background:var(--paper);padding:8px 0}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;min-height:8px}
+  .room-chip{border:1px solid var(--line);background:#fff;padding:9px 13px;border-radius:99px;font-weight:600;font-size:14px;color:var(--ink-soft);min-height:40px;transition:.12s}
+  .room-chip:hover{border-color:var(--ink-faint)}
+  .room-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .room-chip.on::before{content:"✓ "}
+  .room-add{display:flex;gap:8px;margin-top:9px}
+  .room-add .ipt{flex:1}
+  .filterbar .ipt{flex:1;min-width:160px}
+  .pill-toggle{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .pill{border:1px solid var(--line);background:#fff;padding:6px 11px;border-radius:99px;font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .danger-zone{border:1px solid var(--bad-tint);border-radius:var(--radius);padding:14px;margin-top:8px}
+
+  /* ---------- Export / Report ---------- */
+  .rep{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 6px;margin-bottom:14px}
+  .rep-head{border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:14px}
+  .rep-head h2{font-size:20px}
+  .rep-head .meta{font-size:13px;color:var(--ink-soft);margin-top:3px}
+  .rep-pos{border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;break-inside:avoid;page-break-inside:avoid}
+  .rep-pos .ph{display:flex;justify-content:space-between;gap:12px;align-items:baseline;border-bottom:1px solid var(--line-soft);padding-bottom:6px;margin-bottom:6px}
+  .rep-pos .ph .pt{font-weight:700}
+  .rep-pos .ph .pt .poz{font-family:var(--mono);font-size:13px;color:var(--ink-soft);margin-right:6px}
+  .rep-line{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:3px 0}
+  .rep-line .where{color:var(--ink-soft)}
+  .rep-line .q{font-family:var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rep-sub{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:2px 0 2px 14px;color:var(--ink-faint)}
+  .rep-sub .q{font-family:var(--sans);font-variant-numeric:tabular-nums}
+  .rep-total{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line-soft);margin-top:6px;padding-top:6px;font-weight:700}
+  .rep-total .q{font-family:var(--sans);font-variant-numeric:tabular-nums}
+  .rep-total .cmp{font-weight:600;font-size:12.5px;margin-left:8px}
+  .rep-total .cmp.warn{color:var(--warn)} .rep-total .cmp.info{color:var(--info)} .rep-total .cmp.ok{color:var(--ok)}
+
+  @media print{
+    header.app,nav.tabs,.no-print{display:none!important}
+    body{background:#fff}
+    main{padding:0;max-width:none}
+    .view{display:none!important}
+    #view-export{display:block!important}
+    .rep,.rep-pos{box-shadow:none;border-color:#ccc}
+    #toast{display:none!important}
+    #loginOverlay,#cloudBar{display:none!important}
+  }
+  @page{size:A4;margin:14mm 12mm}
+  #loginOverlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:var(--bg,#0f1115);padding:20px}
+  #loginOverlay .login-card{width:100%;max-width:360px;background:var(--card,#fff);border:1px solid var(--line,#e5e7eb);border-radius:18px;padding:26px 22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  #loginOverlay .login-mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#4f7cff,#8a5bff);margin:0 auto 12px}
+  #loginOverlay h2{text-align:center;margin:0 0 4px}
+  #loginOverlay .login-sub{text-align:center;color:var(--ink-soft);font-size:13.5px;margin:0 0 18px}
+  #loginOverlay .login-err{color:var(--bad,#d23b3b);font-size:13px;min-height:18px;margin:4px 0 6px}
+  #loginOverlay .login-note{color:var(--ink-soft);font-size:12px;margin-top:12px;text-align:center}
+  .cloudbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 13px;border-radius:11px;background:var(--grey-tint,#f3f4f6);border:1px solid var(--line);margin-bottom:12px;font-size:13px}
+  .cloudbar .dot{width:9px;height:9px;border-radius:50%;background:var(--ok,#22a06b)}
+  .cloudbar .btn{margin-left:auto}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="brand">
+    <div class="mark"></div>
+    <div class="t"><b>Aufmaß</b><span id="hdProject">—</span></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="hbtn" id="btnUndo" title="Rückgängig (Cmd+Z)">↶</button>
+  <button class="hbtn" id="btnRedo" title="Vorwärts (Cmd+Shift+Z)">↷</button>
+</header>
+
+<nav class="tabs">
+  <button data-tab="projekte" class="active">Projekte</button>
+  <button data-tab="lv">Leistungsverz.</button>
+  <button data-tab="aufmass">Aufmaß</button>
+  <button data-tab="suche">Suche</button>
+  <button data-tab="export">Export</button>
+</nav>
+
+<main>
+  <!-- ===================== PROJEKTE ===================== -->
+  <section class="view active" id="view-projekte">
+
+    <div class="card frame-active">
+      <h2 id="frameBauName">Aktueller Bau</h2>
+      <div class="sub">Ein Bau kann ein eigenes LV haben oder ein gemeinsames Rahmenvertrags-LV nutzen. Nachträge/manuelle Positionen bleiben immer beim Bau.</div>
+      <label class="fld"><span>Bezeichnung des Baus</span>
+        <input class="ipt" id="bauName" placeholder="z. B. Bauvorhaben Müllerstraße"></label>
+      <label class="fld"><span>LV-Quelle</span>
+        <select class="ipt" id="bauRahmenSel"></select>
+        <div class="hint" id="bauRahmenHint"></div></label>
+      <div class="stats" style="margin:6px 0 14px">
+        <div class="stat"><div class="v" id="stLv">0</div><div class="l">LV-Positionen</div></div>
+        <div class="stat"><div class="v" id="stRooms">0</div><div class="l">Räume</div></div>
+        <div class="stat"><div class="v" id="stAufCount">0</div><div class="l">Aufmaße</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btnManageRoomsB">Räume verwalten</button>
+        <button class="btn" id="btnSaveTemplate">★ Als Vorlage</button>
+      </div>
+
+      <div class="frame-sep"></div>
+      <div class="subhead">Aufmaße dieses Baus</div>
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn primary" id="btnNewAuf">＋ Neues Aufmaß</button>
+        <button class="btn" id="btnDupAuf">Aktuelles duplizieren</button>
+      </div>
+      <div id="aufList"></div>
+    </div>
+
+    <div class="section-title">Rahmenverträge <span style="font-weight:500;text-transform:none;letter-spacing:0">(gemeinsames LV für mehrere Bauten)</span></div>
+    <div class="card">
+      <div class="sub">Ein Rahmenvertrags-LV gilt zentral für alle verknüpften Bauten. Änderungen und Preise wirken überall. Aufgemessen wird je Bau.</div>
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn primary" id="btnNewRahmen">＋ Neuer Rahmenvertrag</button>
+      </div>
+      <div id="rahmenList"></div>
+    </div>
+
+    <div class="section-title">Vorlagen <span style="font-weight:500;text-transform:none;letter-spacing:0">(wiederverwendbares LV)</span></div>
+    <div class="card" id="templateList"></div>
+
+    <div class="section-title">Bauten <span style="font-weight:500;text-transform:none;letter-spacing:0">(wechseln / verwalten)</span></div>
+    <div class="card">
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn primary" id="btnNewBau">＋ Neuer Bau</button>
+        <button class="btn" id="btnNewBauFromTemplate">aus Vorlage</button>
+      </div>
+      <input class="ipt" id="bauSearch" placeholder="Bau suchen …" style="margin-bottom:8px">
+      <label class="chkline" style="margin:0 0 10px"><input type="checkbox" id="bauShowArchiv"> Archivierte Bauten anzeigen</label>
+      <div id="bauList"></div>
+    </div>
+
+    <div class="section-title">Notfall-Sicherungen</div>
+    <div class="card">
+      <div class="sub">Die App legt automatisch Sicherungsstände an – beim Sperren eines Aufmaßes, beim Beenden einer Korrektur und beim Verlassen der Seite. Die letzten 5 Stände bleiben erhalten und liegen lokal auf diesem Gerät.</div>
+      <div class="btn-row">
+        <button class="btn primary" id="btnBackupNow">💾 Jetzt sichern</button>
+        <button class="btn" id="btnBackupList">↩︎ Wiederherstellen …</button>
+      </div>
+    </div>
+
+    <div class="section-title">Geräte-Wechsel (iPad ↔ Mac)</div>
+    <div class="card">
+      <div class="sub">Zum Wechsel auf ein anderes Gerät: hier sichern (in iCloud Drive/AirDrop) und auf dem anderen Gerät laden. Nur beim Wechsel nötig – nicht im laufenden Betrieb.</div>
+      <div class="btn-row">
+        <button class="btn primary" id="btnShareBackup">📤 Teilen / in iCloud sichern</button>
+        <button class="btn" id="btnImportAll">📥 Aus Datei / iCloud laden</button>
+      </div>
+      <div class="hint" style="margin-top:8px">Tipp: Beim Teilen „In Dateien sichern“ → iCloud Drive wählen. Auf dem anderen Gerät „Aus Datei / iCloud laden“ und dieselbe Datei auswählen.</div>
+      <div class="hint" id="syncDiag" style="margin-top:6px;padding:7px 9px;background:var(--grey-tint,#f3f4f6);border:1px solid var(--line);border-radius:8px"></div>
+      <div class="hint" id="buildTag" style="margin-top:6px;text-align:right;opacity:.7"></div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn sm" id="btnExportAll">⤓ Nur als Datei speichern (Download)</button>
+      </div>
+      <div class="danger-zone">
+        <div class="sub" style="margin-bottom:8px"><b>Achtung:</b> löscht den gesamten Bau (alle Aufmaße) unwiderruflich.</div>
+        <button class="btn danger sm" id="btnDeleteBau">Diesen Bau löschen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LV ===================== -->
+  <section class="view" id="view-lv">
+    <div class="btn-row" style="margin-bottom:12px">
+      <button class="btn primary" id="btnImportLV">⤒ LV importieren (CSV oder GAEB X83/X84)</button>
+      <button class="btn" id="btnAddLV">＋ Position</button>
+      <button class="btn" id="btnVorbem">📄 Vorbemerkungen</button>
+      <button class="btn ghost" id="btnClearLV">🗑 LV leeren</button>
+    </div>
+    <div class="filterbar">
+      <input class="ipt" id="lvFilter" placeholder="Im LV suchen (OZ, Text, Einheit) …" style="flex:1;min-width:120px">
+      <span id="lvMatchInfo" class="hint" style="white-space:nowrap"></span>
+      <button class="btn sm" id="lvPrev" title="Vorheriger Treffer">‹</button>
+      <button class="btn sm" id="lvNext" title="Nächster Treffer">›</button>
+      <button class="btn sm" id="lvTextToggle" title="Zwischen Kurz- und Langtext umschalten">📄 Langtext</button>
+    </div>
+    <div class="hint" style="margin:-4px 0 8px">Tipp: Auf eine <b>Titel-Überschrift</b> tippen, um ihr eine Farbe zu geben (🎨).</div>
+    <div class="pill-toggle" id="lvPills">
+      <button class="pill on" data-f="alle">Alle</button>
+      <button class="pill" data-f="offen">Ohne Aufmaß</button>
+      <button class="pill" data-f="diff">Mit Abweichung</button>
+      <button class="pill" data-f="manuell">Manuell/Nachtrag</button>
+    </div>
+    <div id="lvBody"></div>
+  </section>
+
+  <!-- ===================== AUFMASS ===================== -->
+  <section class="view" id="view-aufmass">
+    <div class="card" id="afForm">
+      <h2>Aufmaßzeile erfassen</h2>
+      <div class="sub">Bereich/Raum und eigenen Kurztext schreiben, Menge (auch als Formel, z. B. <code>2*3,50*1,20</code>), dann einer LV-Position zuordnen <b>oder</b> als Nachtrag anlegen.</div>
+      <label class="fld"><span>Eigener Kurztext</span>
+        <input class="ipt" id="afName" placeholder="z. B. Wandfliesen 20×20 weiß"></label>
+      <div class="fld"><span class="fld-label">Räume / Bereiche <span style="font-weight:500;color:var(--ink-faint)">– mehrere wählbar</span></span>
+        <div class="chips" id="afRooms"></div>
+        <div class="room-add">
+          <input class="ipt" id="afNewRoom" placeholder="neuen Raum anlegen …">
+          <button type="button" class="btn sm" id="afAddRoom">＋ Raum</button>
+          <button type="button" class="btn sm ghost" id="afClearRooms">Auswahl leeren</button>
+          <button type="button" class="btn sm ghost" id="afManageRooms">Verwalten</button>
+        </div></div>
+      <datalist id="bereichList"></datalist>
+      <label class="fld"><span>Teilbereich im Raum <span style="font-weight:500;color:var(--ink-faint)">– optional, nur zum Sortieren</span></span>
+        <input class="ipt" id="afTeil" list="teilList" placeholder="z. B. Trinkwasser, Heizung …">
+        <datalist id="teilList"></datalist></label>
+      <div class="grid3">
+        <label class="fld"><span>Menge je Raum / Formel</span>
+          <input class="ipt num" id="afFormel" inputmode="decimal" placeholder="2*3,50"></label>
+        <label class="fld"><span>Ergibt</span>
+          <input class="ipt num" id="afMenge" readonly tabindex="-1" style="background:var(--line-soft)"></label>
+        <label class="fld"><span>Einheit</span>
+          <input class="ipt" id="afEinheit" list="ehList" placeholder="m²"></label>
+      </div>
+      <div class="hint" style="margin:-2px 0 10px">Bei mehreren Räumen gilt die Menge zunächst je Raum – beim Bearbeiten der Zeile pro Raum anpassbar.</div>
+      <datalist id="ehList"><option>m²</option><option>m</option><option>m³</option><option>Stk</option><option>psch</option><option>kg</option><option>h</option></datalist>
+      <label class="fld"><span>Zuordnung</span>
+        <div class="assign-row">
+          <button class="btn ghost" id="afLvBtn">LV-Position zuordnen …</button>
+          <button class="btn ghost" id="afNachtrag">＋ Nachtrag</button>
+        </div>
+        <div class="hint" id="afAssignHint"></div>
+        <button type="button" class="btn sm ghost" id="afVorbemToggle" style="margin-top:6px;display:none">📄 Vorbemerkungen zu diesem Abschnitt</button>
+        <div id="afVorbem" style="display:none;margin-top:8px;max-height:40vh;overflow:auto"></div></label>
+      <label class="fld"><span>Notiz (optional)</span>
+        <input class="ipt" id="afNotiz" placeholder="z. B. ohne Tür"></label>
+      <button class="btn primary block" id="afAdd">＋ Aufmaßzeile hinzufügen</button>
+      <button class="btn block" id="afMultiLv" style="margin-top:6px">📋 Mehrere LV-Positionen übernehmen</button>
+    </div>
+
+    <div class="filterbar">
+      <input class="ipt" id="afFilter" placeholder="Aufmaß durchsuchen …">
+      <button class="pill" id="afGroupToggle">Nach Bereich</button>
+      <button class="pill" id="afAllToggle">Alle Aufmaße</button>
+    </div>
+    <div id="afBody"></div>
+    <div class="danger-zone" style="margin-top:16px">
+      <div class="sub" style="margin-bottom:8px">Setzt dieses Aufmaß zurück – löscht nur die Aufmaßzeilen, LV und Räume bleiben erhalten.</div>
+      <button class="btn ghost sm" id="btnNewMeasure">🧹 Messungen dieses Aufmaßes leeren</button>
+    </div>
+  </section>
+
+  <!-- ===================== SUCHE ===================== -->
+  <section class="view" id="view-suche">
+    <div class="card">
+      <h2>Suche</h2>
+      <div class="sub">Wo wurde was aufgemessen? Suche nach Artikel, OZ, Bereich/Raum oder Notiz.</div>
+      <input class="ipt" id="globalSearch" placeholder="z. B. „Fliesen“, „Bad“, oder OZ „01.02“ …" autocomplete="off">
+    </div>
+    <div id="searchResults"></div>
+  </section>
+
+  <!-- ===================== EXPORT ===================== -->
+  <section class="view" id="view-export">
+    <div class="card no-print">
+      <h2>Export &amp; Versand</h2>
+      <div class="sub">Auswertung je Position: wo wurde sie aufgemessen. Als PDF drucken, als CSV-Tabelle sichern oder als Text kopieren.</div>
+      <div class="pill-toggle" id="expPills">
+        <button class="pill on" data-g="pos">Nach LV-Position</button>
+        <button class="pill" data-g="bereich">Nach Bereich</button>
+      </div>
+      <div class="pill-toggle" id="expOpts">
+        <button class="pill" data-o="details">Einzelzeilen</button>
+        <button class="pill" data-o="offen">Offene Positionen</button>
+        <button class="pill" data-o="alleauf">Alle Aufmaße</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="expPrint">🖨 Als PDF / Drucken</button>
+        <button class="btn" id="expXLSX">⤓ Excel (3 Blätter)</button>
+        <button class="btn" id="expCSV">⤓ CSV-Tabelle</button>
+        <button class="btn" id="expCopy">📋 Text kopieren</button>
+      </div>
+    </div>
+    <div id="exportPreview"></div>
+  </section>
+</main>
+
+<!-- generic modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal"></div>
+</div>
+
+<input type="file" id="fileInput" style="display:none">
+<input type="file" id="backupInput" accept=".json,application/json" style="display:none">
+<div id="toast"></div>
+
+<script>
+"use strict";
+window.addEventListener("error",function(ev){
+  try{
+    var d=document.getElementById("globalErr");
+    if(!d){d=document.createElement("div");d.id="globalErr";d.style.cssText="position:fixed;left:0;right:0;top:0;z-index:99999;background:#b91c1c;color:#fff;padding:10px 14px;font:13px/1.4 -apple-system,sans-serif;white-space:pre-wrap";document.body&&document.body.appendChild(d);}
+    d.textContent="⚠ Fehler: "+((ev&&ev.message)||"unbekannt")+"  ("+((ev&&ev.filename)||"")+":"+((ev&&ev.lineno)||"")+")";
+  }catch(e){}
+});
+window.addEventListener("unhandledrejection",function(ev){
+  try{
+    var d=document.getElementById("globalErr");
+    if(!d){d=document.createElement("div");d.id="globalErr";d.style.cssText="position:fixed;left:0;right:0;top:0;z-index:99999;background:#b45309;color:#fff;padding:10px 14px;font:13px/1.4 -apple-system,sans-serif;white-space:pre-wrap";document.body&&document.body.appendChild(d);}
+    d.textContent="⚠ Cloud/Async-Fehler: "+((ev&&ev.reason&&(ev.reason.message||ev.reason))||"unbekannt");
+  }catch(e){}
+});
+
+try{
+  var _bm=document.createElement("div");
+  _bm.id="_bootmark";
+  _bm.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#7c5e00;color:#fff;padding:6px 10px;font:12px -apple-system,sans-serif;text-align:center";
+  _bm.textContent="App-Skript gestartet – Aufbau läuft …";
+  (document.body||document.documentElement).appendChild(_bm);
+}catch(e){}
+
+/* ======================= Speicher (IndexedDB) ======================= */
+const APP_BUILD="2026-08 · IDB-1 (IndexedDB + Auto-Sicherung)";
+const IDB_DBNAME="thiele_aufmass", IDB_STORE="kv";
+let _idbP=null;
+function idb(){
+  if(!_idbP)_idbP=new Promise((res,rej)=>{
+    const rq=indexedDB.open(IDB_DBNAME,1);
+    rq.onupgradeneeded=()=>{const db=rq.result;if(!db.objectStoreNames.contains(IDB_STORE))db.createObjectStore(IDB_STORE);};
+    rq.onsuccess=()=>res(rq.result);
+    rq.onerror=()=>rej(rq.error);
+  });
+  return _idbP;
+}
+function idbGet(k){return idb().then(db=>new Promise((res,rej)=>{const r=db.transaction(IDB_STORE,"readonly").objectStore(IDB_STORE).get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));}
+function idbSet(k,v){return idb().then(db=>new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);}));}
+function idbDel(k){return idb().then(db=>new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).delete(k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);}));}
+const CLOUD_ON=false; // Firebase/Cloud entfernt – App läuft rein lokal (IndexedDB)
+function blankDB(){return {version:2,bauten:[],templates:[],rahmen:[],activeBauId:null};}
+
+function blankAuf(name){return {id:uid(),name:name||"Aufmaß 1",createdAt:Date.now(),auf:[],status:"offen",sentAt:null};}
+function blankBau(name){
+  const a=blankAuf("Aufmaß 1");
+  return {id:uid(),name:name||"Neuer Bau",createdAt:Date.now(),lv:[],raeume:[],aufmasse:[a],activeAufId:a.id};
+}
+let DB=normalize(blankDB());
+function normalize(d){
+  if(!d.templates)d.templates=[];
+  if(!Array.isArray(d.rahmen))d.rahmen=[];
+  if(!Array.isArray(d.bauten)||!d.bauten.length){const b=blankBau("Bau 1");d.bauten=[b];d.activeBauId=b.id;}
+  d.bauten.forEach(b=>{
+    if(!Array.isArray(b.lv))b.lv=[];
+    if(b.rahmenId===undefined)b.rahmenId=null;
+    if(b.rahmenId&&!d.rahmen.find(r=>r.id===b.rahmenId))b.rahmenId=null;
+    if(!b.rahmenMengen||typeof b.rahmenMengen!=="object")b.rahmenMengen={};
+    if(!Array.isArray(b.titelRegeln))b.titelRegeln=[];
+    if(!b.titelFarben||typeof b.titelFarben!=="object")b.titelFarben={};
+    if(typeof b.archiviert!=="boolean")b.archiviert=false;
+    if(!Array.isArray(b.vorbemerkungen))b.vorbemerkungen=[];
+    if(!Array.isArray(b.raeume))b.raeume=[];
+    if(!Array.isArray(b.aufmasse)||!b.aufmasse.length){const a=blankAuf("Aufmaß 1");b.aufmasse=[a];b.activeAufId=a.id;}
+    if(!b.aufmasse.find(a=>a.id===b.activeAufId))b.activeAufId=b.aufmasse[0].id;
+    // Migration: jede Aufmaßzeile erhält eine rooms-Liste {raum,formel,menge}
+    b.aufmasse.forEach(au=>{
+      if(!Array.isArray(au.auf))au.auf=[];
+      if(au.status==="gesendet"){(au.auf||[]).forEach(e=>{if(e.aufgemessen==null)e.aufgemessen=(e.korrektur&&e.korrektur.vorher!=null)?e.korrektur.vorher:(e.rooms||[]).reduce((s,r)=>s+(r.menge||0),0);if(!Array.isArray(e.aufRooms))e.aufRooms=(e.rooms||[]).map(r=>({raum:r.raum||"",teil:r.teil||"",menge:r.menge||0}));});}
+      if(!au.status)au.status="offen";
+      if(au.sentAt===undefined)au.sentAt=null;
+      (au.auf||[]).forEach(a=>{
+        if(!Array.isArray(a.rooms)){
+          a.rooms=[{raum:a.bereich||"",formel:a.formel||"",menge:(a.menge!=null?a.menge:0)}];
+          delete a.bereich;delete a.formel;delete a.menge;
+        }
+      });
+    });
+  });
+  d.rahmen.forEach(r=>{if(!Array.isArray(r.lv))r.lv=[];if(!Array.isArray(r.vorbemerkungen))r.vorbemerkungen=[];});
+  if(!d.bauten.find(b=>b.id===d.activeBauId))d.activeBauId=d.bauten[0].id;
+  return d;
+}
+/* Gesamtmenge einer Aufmaßzeile (Summe über alle Räume) */
+function entryTotal(e){return (e.rooms||[]).reduce((s,r)=>s+(r.menge||0),0);}
+function aufMenge(e){return (e.aufgemessen!=null)?e.aufgemessen:entryTotal(e);} // aufgemessen (fest ab Sperren)
+function korrMenge(e){return entryTotal(e);} // aktuelle (ggf. korrigierte) Menge
+function korrDiff(e){return korrMenge(e)-aufMenge(e);}
+function markAufSent(au){
+  au.status="gesendet";au.sentAt=todayStr();
+  (au.auf||[]).forEach(e=>{
+    if(e.aufgemessen==null)e.aufgemessen=entryTotal(e);
+    if(!Array.isArray(e.aufRooms))e.aufRooms=(e.rooms||[]).map(r=>({raum:r.raum||"",teil:r.teil||"",menge:r.menge||0}));
+  });
+  makeBackup("Aufmaß gesperrt");
+}
+function fullUnlock(au){
+  au.status="offen";au.sentAt=null;
+  (au.auf||[]).forEach(e=>{delete e.aufgemessen;delete e.korrektur;delete e.aufRooms;});
+}
+function aufRoomMenge(e,raum,teil){
+  if(!Array.isArray(e.aufRooms))return null;
+  const m=e.aufRooms.find(x=>(x.raum||"")===(raum||"")&&(x.teil||"")===(teil||""));
+  return m?(m.menge||0):0;
+}
+let saveTimer=null,saveErr=false;
+function saveDB(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    idbSet("main",DB).then(()=>{saveErr=false;}).catch(e=>{console.error(e);if(!saveErr){saveErr=true;toast("Speichern fehlgeschlagen: "+((e&&e.message)||e));}});
+  },300);
+  scheduleHist();
+}
+function saveNow(){clearTimeout(saveTimer);return idbSet("main",DB).catch(e=>console.error(e));}
+
+/* ---- Automatische Notfall-Sicherungen (5 Stände) ---- */
+const BK_KEEP=5;
+let bkBusy=false;
+function makeBackup(reason){
+  if(bkBusy)return Promise.resolve();
+  bkBusy=true;
+  let snap;
+  try{snap=JSON.parse(JSON.stringify(DB));}catch(e){bkBusy=false;return Promise.resolve();}
+  const ts=Date.now();
+  return idbGet("bk_index").then(idx=>{
+    idx=Array.isArray(idx)?idx:[];
+    return idbSet("bk_"+ts,{ts,reason:reason||"",data:snap}).then(()=>{
+      idx.push({ts,reason:reason||""});
+      const rem=[];while(idx.length>BK_KEEP)rem.push(idx.shift());
+      return Promise.all(rem.map(x=>idbDel("bk_"+x.ts))).then(()=>idbSet("bk_index",idx));
+    });
+  }).catch(e=>console.error("backup",e)).then(()=>{bkBusy=false;});
+}
+function listBackups(){return idbGet("bk_index").then(idx=>Array.isArray(idx)?idx.slice().reverse():[]);}
+function restoreBackup(ts){
+  return idbGet("bk_"+ts).then(b=>{
+    if(!b||!b.data){toast("Sicherung nicht gefunden");return;}
+    DB=normalize(b.data);
+    return saveNow().then(()=>{closeModal();histInit();renderAll();toast("Stand wiederhergestellt");});
+  }).catch(e=>{console.error(e);toast("Wiederherstellen fehlgeschlagen");});
+}
+
+/* ---- Undo/Redo (Verlauf vollständiger Zustände) ---- */
+let history=[],histIndex=-1,histTimer=null,restoring=false;
+function snapDB(){return JSON.stringify(DB);}
+function histInit(){history=[snapDB()];histIndex=0;updateUndoButtons();}
+function histCommit(){
+  if(restoring)return;
+  const s=snapDB();
+  if(history[histIndex]===s)return;
+  history=history.slice(0,histIndex+1);
+  history.push(s);
+  if(history.length>60)history.shift();
+  histIndex=history.length-1;
+  updateUndoButtons();
+}
+function scheduleHist(){if(restoring)return;clearTimeout(histTimer);histTimer=setTimeout(histCommit,450);}
+function flushHist(){clearTimeout(histTimer);histCommit();}
+function applyState(s){
+  restoring=true;
+  DB=JSON.parse(s);
+  idbSet("main",DB).catch(e=>console.error(e));
+  closeModal();renderAll();
+  restoring=false;updateUndoButtons();
+}
+function undo(){flushHist();if(histIndex<=0){toast("Nichts zum Rückgängigmachen");return;}histIndex--;applyState(history[histIndex]);toast("Rückgängig");}
+function redo(){flushHist();if(histIndex>=history.length-1){toast("Nichts zum Wiederholen");return;}histIndex++;applyState(history[histIndex]);toast("Vorwärts");}
+function updateUndoButtons(){
+  const u=el("btnUndo"),r=el("btnRedo");
+  if(u)u.disabled=histIndex<=0;
+  if(r)r.disabled=histIndex>=history.length-1;
+}
+function bau(){
+  if(!Array.isArray(DB.bauten)||!DB.bauten.length){
+    const a=blankAuf("Aufmaß 1");
+    DB.bauten=[{id:uid(),name:"Bau 1",createdAt:Date.now(),activeAufId:a.id,raeume:[],rahmenId:null,rahmenMengen:{},titelFarben:{},titelRegeln:[],archiviert:false,vorbemerkungen:[],lv:[],aufmasse:[a]}];
+    DB.activeBauId=DB.bauten[0].id;
+  }
+  return DB.bauten.find(b=>b.id===DB.activeBauId)||DB.bauten[0];
+}
+/* Rahmenvertrag: zentrales LV, das mehrere Bauten teilen. Nachträge/manuelle bleiben lokal im Bau. */
+function rahmenOf(b){return (b&&b.rahmenId)?(DB.rahmen||[]).find(r=>r.id===b.rahmenId):null;}
+function lvAll(b){const r=rahmenOf(b);return r?[...(r.lv||[]),...(b.lv||[])]:(b.lv||[]);}
+function vorbemAll(b){b=b||bau();const r=rahmenOf(b);return [...((r&&r.vorbemerkungen)||[]),...((b&&b.vorbemerkungen)||[])];}
+function LV(){return lvAll(bau());}
+let importTargetOverride=null;
+function lvImportTarget(){if(importTargetOverride)return importTargetOverride;const r=rahmenOf(bau());return r?r:bau();} // Objekt mit .lv
+function targetIsRahmen(){return (DB.rahmen||[]).includes(lvImportTarget());}
+function lvIsRahmen(id){const r=rahmenOf(bau());return !!(r&&(r.lv||[]).some(x=>x.id===id));}
+function lvRahmenPos(pos){const r=rahmenOf(bau());return !!(r&&(r.lv||[]).includes(pos));}
+/* Menge LV ist bei Rahmen-Positionen je Bau verschieden (Override in bau.rahmenMengen), Preise/Texte bleiben gemeinsam. */
+function posMengeLv(pos){
+  if(!pos)return null;
+  if(lvRahmenPos(pos)){const m=bau().rahmenMengen||{};return (pos.id in m)?m[pos.id]:(pos.mengeLv!=null?pos.mengeLv:null);}
+  return pos.mengeLv!=null?pos.mengeLv:null;
+}
+function setPosMengeLv(pos,val){
+  if(lvRahmenPos(pos)){const b=bau();b.rahmenMengen=b.rahmenMengen||{};b.rahmenMengen[pos.id]=val;}
+  else pos.mengeLv=val;
+}
+function removeLvPos(id){const b=bau(),r=rahmenOf(b);
+  if((b.lv||[]).some(x=>x.id===id)){b.lv=b.lv.filter(x=>x.id!==id);return;}
+  if(r&&(r.lv||[]).some(x=>x.id===id)){r.lv=r.lv.filter(x=>x.id!==id);}
+}
+function af(){const b=bau();if(!Array.isArray(b.aufmasse)||!b.aufmasse.length){const a=blankAuf("Aufmaß 1");b.aufmasse=[a];b.activeAufId=a.id;}return b.aufmasse.find(a=>a.id===b.activeAufId)||b.aufmasse[0];}
+let korrMode=false; // transient: Korrekturmodus für ein gesendetes Aufmaß
+function aufSent(){return af().status==="gesendet";}
+function aufLocked(){return aufSent()&&!korrMode;} // schreibgeschützt?
+function todayStr(){return new Date().toLocaleDateString("de-DE");}
+
+/* ======================= Helpers ======================= */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function el(id){return document.getElementById(id);}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function toast(msg){const t=el("toast");t.innerHTML="";t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2200);}
+function toastAction(msg,label,cb,ms){
+  const t=el("toast");
+  t.innerHTML=`<span>${esc(msg)}</span> <button class="toast-act">${esc(label)}</button>`;
+  t.classList.add("show");
+  t.querySelector(".toast-act").onclick=()=>{t.classList.remove("show");clearTimeout(t._h);cb();};
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),ms||5000);
+}
+
+function parseDE(str){
+  if(str==null) return null;
+  let s=String(str).trim().replace(/\s/g,"").replace(/[^0-9.,\-]/g,"");
+  if(s===""||s==="-") return null;
+  const hasC=s.includes(","),hasD=s.includes(".");
+  if(hasC&&hasD){ s=s.replace(/\./g,"").replace(",","."); }
+  else if(hasC){ s=s.replace(",","."); }
+  else if(hasD&&(s.split(".").length-1)>1){ s=s.replace(/\./g,""); } // mehrere Punkte = Tausender
+  // ein einzelner Punkt -> Dezimalpunkt (Excel/JS-Export); so lassen
+  const n=parseFloat(s);
+  return isNaN(n)?null:n;
+}
+/* Preise: deutsches Format mit Tausenderpunkt korrekt lesen ("1.250"=1250, "1.234,56"=1234.56, "42,90"=42.9, "42.90"=42.9). */
+function parseMoney(str){
+  if(str==null) return null;
+  let s=String(str).trim().replace(/\s/g,"").replace(/[^0-9.,\-]/g,"");
+  if(s===""||s==="-") return null;
+  const hasC=s.includes(","),hasD=s.includes(".");
+  if(hasC&&hasD){
+    if(s.lastIndexOf(",")>s.lastIndexOf(".")) s=s.replace(/\./g,"").replace(",","."); // deutsch: 1.234,56
+    else s=s.replace(/,/g,""); // englisch: 1,234.56
+  }else if(hasC){
+    const p=s.split(",");
+    if(p.length>2) s=s.replace(/,/g,"");                 // 1,234,567 -> Tausender
+    else if(p[1]&&p[1].length===3) s=s.replace(/,/g,""); // 1,234 -> 1234
+    else s=s.replace(",",".");                           // 42,90 -> 42.9
+  }else if(hasD){
+    const p=s.split(".");
+    if(p.length>2) s=s.replace(/\./g,"");                 // 1.234.567 -> Tausender
+    else if(p[1]&&p[1].length===3) s=s.replace(/\./g,""); // 1.250 -> 1250 (Tausenderpunkt)
+    // sonst (1-2 Nachkommastellen): Dezimalpunkt, so lassen (42.90)
+  }
+  const n=parseFloat(s);
+  return isNaN(n)?null:n;
+}
+function fmt(n,dec){
+  if(n==null||isNaN(n)) return "–";
+  const d=dec==null?3:dec;
+  let s=Number(n).toLocaleString("de-DE",{minimumFractionDigits:0,maximumFractionDigits:d});
+  return s;
+}
+function fmtEUR(n){
+  if(n==null||isNaN(n))return "";
+  return Number(n).toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+}
+function evalFormel(str){
+  if(str==null) return null;
+  let s=String(str).trim();
+  if(s==="") return null;
+  s=s.replace(/,/g,".").replace(/\s/g,"");
+  if(!/^[0-9.+\-*/()]+$/.test(s)) return NaN;
+  try{ const v=Function('"use strict";return ('+s+')')(); return (typeof v==="number"&&isFinite(v))?v:NaN; }
+  catch(e){ return NaN; }
+}
+
+/* aufgemessene Menge je LV-Position */
+function mengeAuf(lvId){
+  return af().auf.reduce((sum,a)=>a.lvId===lvId?sum+entryTotal(a):sum,0);
+}
+
+/* ======================= Tabs ======================= */
+document.querySelectorAll("nav.tabs button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    el("view-"+b.dataset.tab).classList.add("active");
+    if(b.dataset.tab==="aufmass"){refreshDatalists();renderRoomChips();renderAuf();}
+    if(b.dataset.tab==="lv")renderLV();
+    if(b.dataset.tab==="projekte")renderProjekte();
+    if(b.dataset.tab==="export")renderExport();
+    window.scrollTo(0,0);
+  });
+});
+
+/* ======================= Modal ======================= */
+function openModal(html){el("modal").innerHTML=html;el("modalBg").classList.add("open");}
+function closeModal(){el("modalBg").classList.remove("open");}
+el("modalBg").addEventListener("click",e=>{if(e.target===el("modalBg"))closeModal();});
+
+/* ======================= BAU / PROJEKTE view ======================= */
+function renderHeader(){
+  el("hdProject").textContent=(bau().name||"—")+" · "+(af().name||"");
+  el("bauName").value=bau().name||"";
+}
+function renderStats(){
+  const b=bau();
+  el("stLv").textContent=lvAll(b).length;
+  el("stRooms").textContent=getRooms(b).length;
+  el("stAufCount").textContent=b.aufmasse.length;
+}
+function renderProjekte(){
+  renderHeader();renderStats();
+  // Aufmaße des aktuellen Baus
+  const b=bau();
+  const al=el("aufList");
+  al.innerHTML=b.aufmasse.map(a=>{
+    const cur=a.id===b.activeAufId;
+    const open=a.auf.filter(x=>!x.lvId).length;
+    const sent=a.status==="gesendet";
+    return `<div class="listrow ${cur?'cur':''}">
+      <div class="info"><b>${esc(a.name)}</b> ${cur?'<span class="badge b-ok">aktiv</span>':''}${sent?' <span class="badge b-info">🔒 gesendet'+(a.sentAt?" "+a.sentAt:"")+'</span>':''}
+        <div class="x">${a.auf.length} Zeilen${open?" · "+open+" offen":""} · ${new Date(a.createdAt).toLocaleDateString("de-DE")}</div></div>
+      ${cur?'':`<button class="btn sm" data-openauf="${a.id}">Öffnen</button>`}
+      <button class="iconbtn" data-lockauf="${a.id}" title="${sent?'Sperre aufheben':'Als gesendet markieren (sperren)'}">${sent?'🔓':'🔒'}</button>
+      <button class="iconbtn" data-renauf="${a.id}" title="Umbenennen">✎</button>
+      <button class="iconbtn del" data-delauf="${a.id}" title="Löschen">🗑</button>
+    </div>`;
+  }).join("");
+  al.querySelectorAll("[data-lockauf]").forEach(x=>x.onclick=()=>{
+    const a=b.aufmasse.find(z=>z.id===x.dataset.lockauf);if(!a)return;
+    if(a.status==="gesendet"){
+      if(confirm('Sperre von „'+a.name+'“ VOLLSTÄNDIG aufheben?\n\nAchtung: Das ursprünglich Aufgemessene wird verworfen und das Aufmaß wieder frei bearbeitbar (Neu-Aufmessen). Für eine reine Korrektur mit fester Aufmaß-Menge nutze im Aufmaß „Zur Korrektur entsperren“.')){fullUnlock(a);if(a.id===b.activeAufId)korrMode=false;saveDB();renderAll();toast("Sperre vollständig aufgehoben");}
+    }else{
+      if(confirm('„'+a.name+'“ als gesendet markieren und sperren? Die aufgemessenen Mengen werden festgehalten. Änderungen danach nur über „Zur Korrektur entsperren“.')){markAufSent(a);saveDB();renderAll();toast("Aufmaß gesperrt");}
+    }
+  });
+  al.querySelectorAll("[data-openauf]").forEach(x=>x.onclick=()=>{b.activeAufId=x.dataset.openauf;korrMode=false;saveDB();renderAll();toast("Aufmaß geöffnet");});
+  al.querySelectorAll("[data-renauf]").forEach(x=>x.onclick=()=>{
+    const a=b.aufmasse.find(z=>z.id===x.dataset.renauf);const nn=prompt("Name des Aufmaßes:",a.name);if(nn!==null){a.name=nn||a.name;saveDB();renderProjekte();renderHeader();}
+  });
+  al.querySelectorAll("[data-delauf]").forEach(x=>x.onclick=()=>{
+    if(b.aufmasse.length<=1){toast("Das letzte Aufmaß des Baus kann nicht gelöscht werden");return;}
+    const a=b.aufmasse.find(z=>z.id===x.dataset.delauf);
+    if(confirm('Aufmaß „'+a.name+'“ löschen?')){
+      b.aufmasse=b.aufmasse.filter(z=>z.id!==x.dataset.delauf);
+      if(b.activeAufId===x.dataset.delauf)b.activeAufId=b.aufmasse[0].id;
+      saveDB();renderAll();toast("Aufmaß gelöscht");
+    }
+  });
+  // Titel des Rahmen-Blocks = aktueller Bau
+  {const fb=el("frameBauName");if(fb)fb.textContent=bau().name?("Aktueller Bau: "+bau().name):"Aktueller Bau";}
+  // Bauten (Suche + Archiv)
+  const bl=el("bauList");
+  const q=((el("bauSearch")&&el("bauSearch").value)||"").toLowerCase().trim();
+  const showArch=!!(el("bauShowArchiv")&&el("bauShowArchiv").checked);
+  let list=DB.bauten.filter(x=>showArch?true:!x.archiviert);
+  if(q)list=list.filter(x=>(x.name||"").toLowerCase().includes(q));
+  const archivCount=DB.bauten.filter(x=>x.archiviert).length;
+  bl.innerHTML=(list.length?list.map(x=>{
+    const cur=x.id===DB.activeBauId;
+    return `<div class="listrow ${cur?'cur':''} ${x.archiviert?'archived':''}">
+      <div class="info"><b>${esc(x.name)}</b> ${cur?'<span class="badge b-ok">geöffnet</span>':''}${x.archiviert?' <span class="badge b-arch">Archiv</span>':''}
+        <div class="x">${lvAll(x).length} LV · ${(x.raeume||[]).length} Räume · ${x.aufmasse.length} Aufmaße</div></div>
+      ${cur?'':`<button class="btn sm" data-openbau="${x.id}">Öffnen</button>`}
+      <button class="iconbtn" data-archbau="${x.id}" title="${x.archiviert?'Aus Archiv holen':'Als erledigt archivieren'}">${x.archiviert?'📤':'📥'}</button>
+    </div>`;
+  }).join(""):`<div class="empty"><p>${q?"Kein Bau gefunden.":"Keine Bauten."}</p></div>`)
+    +(!showArch&&archivCount?`<div class="hint" style="margin-top:8px">${archivCount} archivierte(r) Bau(ten) ausgeblendet – oben „Archivierte Bauten anzeigen“ ankreuzen.</div>`:"");
+  bl.querySelectorAll("[data-openbau]").forEach(x=>x.onclick=()=>{DB.activeBauId=x.dataset.openbau;saveDB();renderAll();toast("Bau geöffnet");});
+  bl.querySelectorAll("[data-archbau]").forEach(x=>x.onclick=()=>{
+    const bb=DB.bauten.find(z=>z.id===x.dataset.archbau);if(!bb)return;
+    bb.archiviert=!bb.archiviert;saveDB();renderProjekte();toast(bb.archiviert?"Bau archiviert":"Bau aus Archiv geholt");
+  });
+  if(el("bauSearch"))el("bauSearch").oninput=()=>renderProjekte();
+  if(el("bauShowArchiv"))el("bauShowArchiv").onchange=()=>renderProjekte();
+  // Vorlagen
+  const tl=el("templateList");
+  tl.innerHTML=DB.templates.length?DB.templates.map(t=>`
+    <div class="listrow">
+      <div class="info"><b>${esc(t.name)}</b><div class="x">${t.lv.length} LV-Positionen${(t.raeume&&t.raeume.length)?" · "+t.raeume.length+" Räume":""} · ${new Date(t.createdAt).toLocaleDateString("de-DE")}</div></div>
+      <button class="btn sm primary" data-use="${t.id}">Als Bau</button>
+      <button class="iconbtn del" data-deltpl="${t.id}" title="Löschen">🗑</button>
+    </div>`).join(""):`<div class="empty"><p>Noch keine Vorlagen.</p><p class="hint">Speichere das LV eines Baus oben als Vorlage.</p></div>`;
+  tl.querySelectorAll("[data-use]").forEach(b2=>b2.onclick=()=>useTemplate(b2.dataset.use));
+  tl.querySelectorAll("[data-deltpl]").forEach(b2=>b2.onclick=()=>{
+    if(confirm("Vorlage löschen?")){DB.templates=DB.templates.filter(t=>t.id!==b2.dataset.deltpl);saveDB();renderProjekte();}
+  });
+  // LV-Quelle (Rahmenvertrag) des aktuellen Baus
+  const rs=el("bauRahmenSel");
+  if(rs){
+    rs.innerHTML=`<option value="">Eigenes LV (nur dieser Bau)</option>`+
+      (DB.rahmen||[]).map(r=>`<option value="${r.id}" ${b.rahmenId===r.id?"selected":""}>Rahmenvertrag: ${esc(r.name)} (${(r.lv||[]).length} Pos.)</option>`).join("");
+    rs.value=b.rahmenId||"";
+    rs.onchange=()=>{b.rahmenId=rs.value||null;saveDB();renderAll();toast(b.rahmenId?"Mit Rahmenvertrag verknüpft":"Eigenes LV aktiv");};
+    const rh=el("bauRahmenHint");
+    if(rh)rh.textContent=b.rahmenId?"Gemeinsames Rahmen-LV: Importe und Preisänderungen gelten für alle verknüpften Bauten. Nachträge/manuelle Positionen bleiben bei diesem Bau.":"Dieser Bau hat sein eigenes LV.";
+  }
+  // Rahmenverträge
+  const rl=el("rahmenList");
+  if(rl){
+    rl.innerHTML=(DB.rahmen||[]).length?DB.rahmen.map(r=>{
+      const used=DB.bauten.filter(x=>x.rahmenId===r.id).length;
+      return `<div class="listrow">
+        <div class="info"><b>${esc(r.name)}</b><div class="x">${(r.lv||[]).length} Positionen · ${used} Bau(ten) verknüpft</div></div>
+        <button class="btn sm" data-rimport="${r.id}">⤒ LV</button>
+        <button class="iconbtn" data-rren="${r.id}" title="Umbenennen">✎</button>
+        <button class="iconbtn del" data-rdel="${r.id}" title="Löschen">🗑</button>
+      </div>`;
+    }).join(""):`<div class="empty"><p>Noch keine Rahmenverträge.</p><p class="hint">Lege einen an und importiere das Rahmen-LV hinein – dann oben als LV-Quelle wählen.</p></div>`;
+    rl.querySelectorAll("[data-rimport]").forEach(btn=>btn.onclick=()=>{importTargetOverride=DB.rahmen.find(z=>z.id===btn.dataset.rimport);el("fileInput").click();});
+    rl.querySelectorAll("[data-rren]").forEach(btn=>btn.onclick=()=>{
+      const r=DB.rahmen.find(z=>z.id===btn.dataset.rren);const nn=prompt("Name des Rahmenvertrags:",r.name);if(nn!==null){r.name=nn||r.name;saveDB();renderProjekte();}
+    });
+    rl.querySelectorAll("[data-rdel]").forEach(btn=>btn.onclick=()=>{
+      const r=DB.rahmen.find(z=>z.id===btn.dataset.rdel);const used=DB.bauten.filter(x=>x.rahmenId===r.id);
+      if(!confirm('Rahmenvertrag „'+r.name+'“ löschen?'+(used.length?" "+used.length+" Bau(ten) verlieren ihr Rahmen-LV (zugeordnete Aufmaßzeilen werden „nicht zugeordnet“).":"")))return;
+      const ids=new Set((r.lv||[]).map(x=>x.id));
+      DB.bauten.forEach(x=>{if(x.rahmenId===r.id)x.rahmenId=null;x.aufmasse.forEach(a=>(a.auf||[]).forEach(e=>{if(ids.has(e.lvId))e.lvId=null;}));});
+      DB.rahmen=DB.rahmen.filter(z=>z.id!==r.id);
+      saveDB();renderAll();toast("Rahmenvertrag gelöscht");
+    });
+  }
+  if(typeof renderCloudStatus==="function")renderCloudStatus();
+}
+
+el("bauName").addEventListener("input",e=>{bau().name=e.target.value;el("hdProject").textContent=(e.target.value||"—")+" · "+(af().name||"");saveDB();});
+
+/* --- Aufmaße --- */
+el("btnNewAuf").onclick=()=>{
+  const b=bau();
+  const def="Aufmaß "+(b.aufmasse.length+1);
+  const name=prompt("Name des neuen Aufmaßes:",def);
+  if(name===null)return;
+  const a=blankAuf(name||def);b.aufmasse.unshift(a);b.activeAufId=a.id;
+  saveDB();renderAll();document.querySelector('[data-tab="aufmass"]').click();
+  toast("Neues Aufmaß angelegt");
+};
+el("btnDupAuf").onclick=()=>{
+  const b=bau(),a=af();
+  const copy=JSON.parse(JSON.stringify(a));copy.id=uid();copy.name=a.name+" (Kopie)";copy.createdAt=Date.now();
+  b.aufmasse.unshift(copy);b.activeAufId=copy.id;saveDB();renderAll();toast("Aufmaß dupliziert");
+};
+
+/* --- Bauten --- */
+el("btnNewBau").onclick=()=>{
+  const def="Bau "+(DB.bauten.length+1);
+  const name=prompt("Name des neuen Baus:",def);
+  if(name===null)return;
+  const b=blankBau(name||def);DB.bauten.unshift(b);DB.activeBauId=b.id;
+  saveDB();renderAll();document.querySelector('[data-tab="lv"]').click();
+  toast("Neuer Bau angelegt – jetzt LV importieren");
+};
+el("btnNewBauFromTemplate").onclick=()=>{
+  if(!DB.templates.length){toast("Noch keine Vorlage vorhanden");return;}
+  openModal(`<h2>Neuer Bau aus Vorlage <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="sub" style="margin-bottom:10px">Das LV (und ggf. Räume) der Vorlage werden in einen neuen Bau übernommen.</div>
+    ${DB.templates.map(t=>`<button class="pick" data-t="${t.id}"><span class="pn">${esc(t.name)}</span><span class="pe">${t.lv.length} Pos.</span></button>`).join("")}`);
+  el("modal").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{useTemplate(b.dataset.t);closeModal();});
+};
+function useTemplate(tid){
+  const t=DB.templates.find(x=>x.id===tid);if(!t)return;
+  const name=prompt("Name des neuen Baus:",t.name);
+  if(name===null)return;
+  const b=blankBau(name||t.name);
+  b.lv=t.lv.map(x=>Object.assign({},x,{id:uid()}));
+  b.raeume=(t.raeume||[]).slice();
+  DB.bauten.unshift(b);DB.activeBauId=b.id;saveDB();renderAll();
+  document.querySelector('[data-tab="lv"]').click();
+  toast("Bau aus Vorlage angelegt");
+}
+el("btnSaveTemplate").onclick=()=>{
+  const b=bau();
+  if(!lvAll(b).length&&!getRooms(b).length){toast("Kein LV oder Raum vorhanden zum Speichern");return;}
+  const name=prompt("Name der Vorlage:",b.name);
+  if(name===null)return;
+  const rooms=getRooms(b);let withRooms=false;
+  if(rooms.length)withRooms=confirm("Räume ("+rooms.length+") in die Vorlage übernehmen?\n\nOK = ja (nur sinnvoll bei gleichbleibenden Räumen)\nAbbrechen = nur das LV speichern");
+  DB.templates.unshift({id:uid(),name:name||"Vorlage",createdAt:Date.now(),
+    lv:lvAll(b).map(x=>Object.assign({},x)),raeume:withRooms?rooms.slice():[]});
+  saveDB();renderProjekte();toast("Als Vorlage gespeichert"+(withRooms?" (mit Räumen)":""));
+};
+el("btnManageRoomsB").onclick=manageRooms;
+el("btnDeleteBau").onclick=()=>{
+  if(DB.bauten.length<=1){toast("Der letzte Bau kann nicht gelöscht werden");return;}
+  if(confirm('Bau „'+bau().name+'“ mit allen Aufmaßen wirklich löschen?')){
+    DB.bauten=DB.bauten.filter(b=>b.id!==DB.activeBauId);
+    DB.activeBauId=DB.bauten[0].id;saveDB();renderAll();toast("Bau gelöscht");
+  }
+};
+el("btnNewMeasure").onclick=()=>{
+  if(!af().auf.length){toast("Keine Messungen vorhanden");return;}
+  if(confirm("Alle Aufmaßzeilen dieses Aufmaßes löschen?\nLV und Räume des Baus bleiben erhalten.")){
+    af().auf=[];saveDB();renderAll();toast("Messungen geleert");
+  }
+};
+
+/* ======================= LV view ======================= */
+let lvFilterMode="alle";
+let lvTextMode="kurz"; // "kurz" | "lang"
+let lvMatchIds=[]; let lvMatchPos=0;
+let pkTextMode="kurz"; // Kurz/Langtext im LV-Auswahldialog
+el("lvPills").querySelectorAll(".pill").forEach(b=>b.onclick=()=>{
+  el("lvPills").querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");lvFilterMode=b.dataset.f;renderLV();
+});
+el("lvFilter").addEventListener("input",()=>{lvMatchPos=0;renderLV();});
+el("lvFilter").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();lvGotoMatch(e.shiftKey?-1:1);}});
+el("lvNext").onclick=()=>lvGotoMatch(1);
+el("lvPrev").onclick=()=>lvGotoMatch(-1);
+
+function statusBadge(pos){
+  const lv=posMengeLv(pos), auf=mengeAuf(pos.id);
+  if(auf===0) return '<span class="badge b-grey">offen</span>';
+  if(lv==null) return '<span class="badge b-info">aufgem.</span>';
+  const diff=auf-lv, tol=Math.max(Math.abs(lv)*0.001,1e-6);
+  if(Math.abs(diff)<=tol) return '<span class="badge b-ok">passt</span>';
+  if(diff>0) return '<span class="badge b-warn">Mehr</span>';
+  return '<span class="badge b-info">Teil</span>';
+}
+function titelColor(gruppe){
+  if(!gruppe)return null;
+  const m=bau().titelFarben||{};
+  return m[gruppe]||null;
+}
+function textOn(hex){
+  if(!hex)return "#111";
+  let c=String(hex).replace("#","");
+  if(c.length===3)c=c.split("").map(x=>x+x).join("");
+  const r=parseInt(c.slice(0,2),16)||0,g=parseInt(c.slice(2,4),16)||0,b=parseInt(c.slice(4,6),16)||0;
+  return ((0.299*r+0.587*g+0.114*b)/255)>0.62?"#111":"#fff";
+}
+function setTitelFarbe(gruppe,color){
+  const b=bau();b.titelFarben=b.titelFarben||{};
+  if(color)b.titelFarben[gruppe]=color; else delete b.titelFarben[gruppe];
+  saveDB();closeModal();renderLV();
+}
+function pickTitelFarbe(gruppe){
+  const cur=(bau().titelFarben||{})[gruppe]||"";
+  const sw=["#22c55e","#f59e0b","#ef4444","#3b82f6","#a855f7","#14b8a6","#eab308","#64748b","#ec4899","#0ea5e9"];
+  openModal(`<h2>Titel-Farbe wählen <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="sub" style="margin-bottom:12px">${esc(gruppe)}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      ${sw.map(c=>`<button class="tfsw" data-c="${c}" title="${c}" style="width:42px;height:42px;border-radius:11px;background:${c};border:${cur.toLowerCase()===c?"3px solid var(--ink)":"1px solid var(--line)"};cursor:pointer"></button>`).join("")}
+    </div>
+    <label class="fld"><span>Eigene Farbe</span><input type="color" id="tfCustom" value="${cur||"#22c55e"}" style="width:64px;height:40px;padding:0;border:1px solid var(--line);border-radius:8px;background:none"></label>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" id="tfCustomSave">Eigene Farbe übernehmen</button>
+      <button class="btn ghost" id="tfNone">Farbe entfernen</button>
+    </div>`);
+  el("modal").querySelectorAll(".tfsw").forEach(b=>b.onclick=()=>setTitelFarbe(gruppe,b.dataset.c));
+  el("tfCustomSave").onclick=()=>setTitelFarbe(gruppe,el("tfCustom").value);
+  el("tfNone").onclick=()=>setTitelFarbe(gruppe,null);
+}
+function renderLV(){
+  const p=bau();
+  const q=(el("lvFilter").value||"").toLowerCase().trim();
+  let rows=lvAll(p).slice();
+  if(lvFilterMode==="offen")rows=rows.filter(r=>mengeAuf(r.id)===0);
+  if(lvFilterMode==="manuell")rows=rows.filter(r=>r.source==="manuell"||r.source==="nachtrag");
+  if(lvFilterMode==="diff")rows=rows.filter(r=>{const a=mengeAuf(r.id),mlv=posMengeLv(r);return a>0&&mlv!=null&&Math.abs(a-mlv)>Math.max(Math.abs(mlv)*0.001,1e-6);});
+  const matchFn=r=>q&&(((r.oz||"")+" "+(r.kurztext||"")+" "+(r.langtext||"")+" "+(r.einheit||"")).toLowerCase().includes(q));
+  lvMatchIds=q?rows.filter(matchFn).map(r=>r.id):[];
+  if(lvMatchPos>=lvMatchIds.length)lvMatchPos=0;
+  const curMatchId=lvMatchIds.length?lvMatchIds[lvMatchPos]:null;
+  {const mi=el("lvMatchInfo");if(mi)mi.textContent=q?(lvMatchIds.length?(lvMatchPos+1)+" / "+lvMatchIds.length:"0 Treffer"):"";}
+
+  if(!lvAll(p).length){
+    el("lvBody").innerHTML=`<div class="card"><div class="empty"><div class="big">📋</div>
+      <p><b>Noch kein Leistungsverzeichnis</b></p>
+      <p class="hint">Importiere eine CSV-Datei (aus Numbers/Excel exportiert) oder lege Positionen manuell an.</p>
+      </div></div>`;return;
+  }
+  if(!rows.length){el("lvBody").innerHTML=`<div class="card"><div class="empty"><p>Keine Treffer.</p></div></div>`;return;}
+
+  const hasEP=lvAll(p).some(r=>r.ep!=null);
+  let sumAuf=0,sumLV=0;
+  let html=`<div class="tablewrap"><table class="lv"><thead><tr>
+    <th>OZ</th><th>Kurztext</th><th class="r">EH</th><th class="r">Menge LV</th><th class="r">Aufmaß</th><th class="r">Diff.</th>${hasEP?'<th class="r">EP</th><th class="r">Betrag</th>':''}<th>Status</th><th></th>
+    </tr></thead><tbody>`;
+  const matchSet=new Set(lvMatchIds);
+  let lastGrp=null;
+  rows.forEach(r=>{
+    const grp=r.gruppe||"";
+    if(grp&&grp!==lastGrp){
+      const col=titelColor(grp);
+      html+=`<tr class="lv-titel" data-titelpick="${encodeURIComponent(grp)}"><td colspan="10"${col?` style="background:${col};color:${textOn(col)};border-left:8px solid rgba(0,0,0,.22)"`:""}>${esc(grp)}<span style="float:right;opacity:.75">🎨</span></td></tr>`;
+      lastGrp=grp;
+    } else if(!grp){ lastGrp=""; }
+    const auf=mengeAuf(r.id);
+    const mlv=posMengeLv(r);
+    const diff=(mlv!=null)?auf-mlv:null;
+    const diffColor=diff==null?"":(Math.abs(diff)<=Math.max(Math.abs(mlv)*0.001,1e-6)?"var(--ok)":(diff>0?"var(--warn)":"var(--info)"));
+    const betrag=(r.ep!=null&&auf>0)?auf*r.ep:null;
+    if(betrag!=null)sumAuf+=betrag;
+    if(r.ep!=null&&mlv!=null)sumLV+=mlv*r.ep;
+    const isMatch=matchSet.has(r.id);
+    html+=`<tr class="row-tap${isMatch?" match":""}${r.id===curMatchId?" match-current":""}" data-edit="${r.id}" data-rowid="${r.id}">
+      <td><span class="oz">${esc(r.ozOffiziell||r.oz||"")}</span>${r.source==="nachtrag"?' <span class="badge b-warn">Nachtrag</span>':r.source==="manuell"?' <span class="badge b-manuell">manuell</span>':''}${(r.ozOffiziell||r.bezOffiziell)?' <span class="badge b-ok">offiziell</span>':''}${lvRahmenPos(r)?' <span class="badge b-info">Rahmen</span>':''}</td>
+      <td>${(lvTextMode==="lang"&&r.langtext)
+          ?`<div class="kt lt-full">${esc(r.langtext)}</div>${(r.bezOffiziell||r.kurztext)?`<div class="lt">${esc(r.bezOffiziell||r.kurztext)}</div>`:""}`
+          :`<div class="kt">${esc(r.bezOffiziell||r.kurztext||"—")}</div>${(r.bezOffiziell&&r.kurztext&&r.bezOffiziell!==r.kurztext)?`<div class="lt">intern: ${esc(r.kurztext)}</div>`:""}`}</td>
+      <td class="r">${esc(r.einheit||"")}</td>
+      <td class="r num">${mlv!=null?fmt(mlv):"–"}</td>
+      <td class="r num">${auf>0?fmt(auf):"–"}</td>
+      <td class="r num" style="color:${diffColor}">${diff!=null&&auf>0?(diff>0?"+":"")+fmt(diff):""}</td>
+      ${hasEP?`<td class="r num">${r.ep!=null?fmtEUR(r.ep):""}</td><td class="r num">${betrag!=null?fmtEUR(betrag):""}</td>`:''}
+      <td>${statusBadge(r)}</td>
+      <td class="r"><button class="iconbtn" data-edit2="${r.id}">✎</button></td>
+    </tr>`;
+  });
+  html+=`</tbody>`;
+  if(hasEP)html+=`<tfoot><tr style="font-weight:700;border-top:2px solid var(--line)">
+    <td colspan="4">Aufmaß-Summe (dieses Aufmaß)</td><td class="r num" colspan="3"></td><td class="r num">${fmtEUR(sumAuf)}</td><td colspan="2"></td></tr>
+    <tr style="color:var(--ink-soft)"><td colspan="4">LV-Auftragswert (Menge LV × EP)</td><td colspan="3"></td><td class="r num">${fmtEUR(sumLV)}</td><td colspan="2"></td></tr></tfoot>`;
+  html+=`</table></div>`;
+  el("lvBody").innerHTML=html;
+  el("lvBody").querySelectorAll("[data-edit],[data-edit2]").forEach(elm=>{
+    elm.onclick=(e)=>{e.stopPropagation();editLV(elm.dataset.edit||elm.dataset.edit2);};
+  });
+  el("lvBody").querySelectorAll("[data-titelpick]").forEach(elm=>{
+    elm.style.cursor="pointer";
+    elm.onclick=()=>pickTitelFarbe(decodeURIComponent(elm.dataset.titelpick));
+  });
+  if(curMatchId){
+    const tr=el("lvBody").querySelector('tr[data-rowid="'+curMatchId+'"]');
+    if(tr&&tr.scrollIntoView){try{tr.scrollIntoView({block:"center",behavior:"smooth"});}catch(e){try{tr.scrollIntoView();}catch(_){}}}
+  }
+  {const vbtn=el("btnVorbem");if(vbtn){const n=vorbemAll().length;vbtn.textContent="📄 Vorbemerkungen"+(n?" ("+n+")":"");}}
+}
+function lvGotoMatch(delta){
+  if(!lvMatchIds.length)return;
+  lvMatchPos=(lvMatchPos+delta+lvMatchIds.length)%lvMatchIds.length;
+  renderLV();
+}
+
+function lvFormHTML(r){
+  const isR=lvRahmenPos(r);
+  return `<label class="fld"><span>OZ / Position</span><input class="ipt" id="lvOZ" value="${esc(r.oz||"")}" placeholder="z. B. 01.02.0030"></label>
+    <label class="fld"><span>Kurztext</span><input class="ipt" id="lvKT" value="${esc(r.kurztext||"")}" placeholder="Kurzbeschreibung"></label>
+    <label class="fld"><span>Langtext (optional)</span><textarea class="ipt" id="lvLT" placeholder="Ausführliche Beschreibung">${esc(r.langtext||"")}</textarea></label>
+    <div class="grid2">
+      <label class="fld"><span>Einheit</span><input class="ipt" id="lvEH" list="ehList" value="${esc(r.einheit||"")}" placeholder="m²"></label>
+      <label class="fld"><span>Menge LV${isR?" (für diesen Bau)":" (optional)"}</span><input class="ipt num" id="lvMenge" inputmode="decimal" value="${posMengeLv(r)!=null?fmt(posMengeLv(r)):""}" placeholder="z. B. 24,50"></label>
+    </div>
+    ${isR?`<div class="hint" style="margin-top:-2px">Die Menge LV gilt nur für diesen Bau. OZ, Text und Einheitspreis sind im Rahmenvertrag für alle Bauten gemeinsam.</div>`:""}
+    <label class="fld"><span>Einheitspreis EP (€${isR?", gemeinsam":", optional"})</span><input class="ipt num" id="lvEP" inputmode="decimal" value="${r.ep!=null?fmt(r.ep,2):""}" placeholder="z. B. 42,90"></label>
+    ${r.source==="nachtrag"?`<div style="border-top:1px solid var(--line);padding-top:10px;margin-top:4px">
+      <div class="fld-label" style="margin-bottom:4px">Offizielle Kennung <span style="font-weight:500;color:var(--ink-faint)">– von Prüfrechnung / Fachplaner</span></div>
+      <div class="hint" style="margin:0 0 6px">Deine interne Kennung: <b>${esc(r.oz||"—")}</b> · „${esc(r.kurztext||"—")}“</div>
+      <div class="grid2">
+      <label class="fld"><span>Offizielle OZ</span><input class="ipt" id="lvOzOff" value="${esc(r.ozOffiziell||"")}" placeholder="z. B. N-01 (aus Rechnung)"></label>
+      <label class="fld"><span>Offizielle Bezeichnung</span><input class="ipt" id="lvBezOff" value="${esc(r.bezOffiziell||"")}" placeholder="Text laut Rechnung/Fachplaner"></label>
+    </div></div><div class="hint" style="margin-top:-2px">Solange leer, gilt deine interne Kennung. Sobald gesetzt, wird die offizielle Kennung angezeigt – deine Mengenzuordnung bleibt erhalten.</div>`:""}`;
+}
+function editLV(id){
+  const r=LV().find(x=>x.id===id);if(!r)return;
+  openModal(`<h2>Position bearbeiten <button class="close" onclick="closeModal()">×</button></h2>
+    ${lvIsRahmen(id)?`<div class="lockbanner ro" style="margin-bottom:10px"><span>📑 Diese Position gehört zum <b>Rahmenvertrag</b>. Änderungen gelten für alle damit verknüpften Bauten.</span></div>`:""}
+    ${lvFormHTML(r)}
+    <div class="btn-row" style="margin-top:6px">
+      <button class="btn primary" id="lvSave">Speichern</button>
+      <button class="btn danger" id="lvDel">Löschen</button>
+    </div>`);
+  el("lvSave").onclick=()=>{
+    r.oz=el("lvOZ").value.trim();r.kurztext=el("lvKT").value.trim();r.langtext=el("lvLT").value.trim();
+    r.einheit=el("lvEH").value.trim();setPosMengeLv(r,parseDE(el("lvMenge").value));
+    if(el("lvEP"))r.ep=parseMoney(el("lvEP").value);
+    if(el("lvOzOff"))r.ozOffiziell=el("lvOzOff").value.trim();
+    if(el("lvBezOff"))r.bezOffiziell=el("lvBezOff").value.trim();
+    saveDB();closeModal();renderLV();renderAuf();toast("Gespeichert");
+  };
+  el("lvDel").onclick=()=>{
+    const used=af().auf.some(a=>a.lvId===id);
+    const shared=lvIsRahmen(id);
+    let msg=used?"Position löschen? Zugeordnete Aufmaßzeilen verlieren ihre Zuordnung.":"Position löschen?";
+    if(shared)msg="Diese Position gehört zum Rahmenvertrag und wird für ALLE damit verknüpften Bauten gelöscht. Fortfahren?";
+    if(!confirm(msg))return;
+    DB.bauten.forEach(b=>b.aufmasse.forEach(a=>(a.auf||[]).forEach(x=>{if(x.lvId===id)x.lvId=null;})));
+    removeLvPos(id);
+    saveDB();closeModal();renderLV();renderAuf();toast("Gelöscht");
+  };
+}
+el("btnAddLV").onclick=()=>{
+  const r={oz:"",kurztext:"",langtext:"",einheit:"",mengeLv:null};
+  openModal(`<h2>Neue Position <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="sub" style="margin-bottom:10px">Für Nachträge oder Positionen, die nicht im importierten LV stehen.</div>
+    ${lvFormHTML(r)}
+    <button class="btn primary block" id="lvCreate" style="margin-top:6px">Hinzufügen</button>`);
+  el("lvCreate").onclick=()=>{
+    const kt=el("lvKT").value.trim();
+    if(!kt&&!el("lvOZ").value.trim()){toast("Bitte OZ oder Kurztext angeben");return;}
+    bau().lv.push({id:uid(),oz:el("lvOZ").value.trim(),kurztext:kt,langtext:el("lvLT").value.trim(),
+      einheit:el("lvEH").value.trim(),mengeLv:parseDE(el("lvMenge").value),ep:(el("lvEP")?parseMoney(el("lvEP").value):null),source:"manuell"});
+    saveDB();closeModal();renderLV();toast("Position hinzugefügt");
+  };
+};
+
+/* ======================= CSV-Import ======================= */
+function withLvScrollAnchor(fn){
+  let anchorTop=170;
+  try{const fb=document.querySelector("#view-lv .filterbar");if(fb)anchorTop=fb.getBoundingClientRect().bottom+4;}catch(e){}
+  let id=null,off=0;
+  const trs=el("lvBody").querySelectorAll("tr[data-edit]");
+  for(let i=0;i<trs.length;i++){const r=trs[i].getBoundingClientRect();if(r.bottom>anchorTop){id=trs[i].getAttribute("data-edit");off=r.top;break;}}
+  fn();
+  if(id){const t2=el("lvBody").querySelector('tr[data-edit="'+id+'"]');if(t2){const nt=t2.getBoundingClientRect().top;window.scrollBy(0,nt-off);}}
+}
+el("btnImportLV").onclick=()=>{importTargetOverride=null;el("fileInput").click();};
+function vorbemFor(gruppe){
+  const g=String(gruppe||"");
+  return vorbemAll().filter(v=>{const vg=String(v.gruppe||"");return !vg||g===vg||g.indexOf(vg)===0||vg.indexOf(g)===0;});
+}
+function vorbemGroupedHtml(list,openAll){
+  if(!list||!list.length)return '<div class="empty" style="padding:12px"><p>Keine Vorbemerkungen zu diesem Abschnitt.</p></div>';
+  const groups={};const order=[];
+  list.forEach(v=>{const g=v.gruppe||"Allgemein";if(!groups[g]){groups[g]=[];order.push(g);}groups[g].push(v);});
+  return order.map(g=>{
+    const inner=groups[g].map(v=>`<div style="margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line-soft)">${v.titel?`<div style="font-weight:700;margin-bottom:2px">${esc(v.titel)}</div>`:""}<div style="white-space:pre-line;font-size:13px;line-height:1.5">${esc(v.text||"")}</div></div>`).join("");
+    return `<details ${openAll?"open":""} style="margin-bottom:6px;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <summary style="cursor:pointer;font-weight:700;padding:8px 10px;background:var(--grey-tint,#eef0f4)">${esc(g)} <span style="font-weight:500;opacity:.7">(${groups[g].length})</span></summary>
+      <div style="padding:8px 10px">${inner}</div></details>`;
+  }).join("");
+}
+function showVorbemerkungen(){
+  const vb=vorbemAll();
+  const body=vb.length?vorbemGroupedHtml(vb,false):'<div class="empty"><p>Keine Vorbemerkungen vorhanden.</p><p class="hint">Beim GAEB-Import (X83) werden Vorbemerkungen automatisch mitgelesen.</p></div>';
+  openModal(`<h2>Vorbemerkungen <button class="close" onclick="closeModal()">×</button></h2><div class="sub" style="margin-bottom:10px">Nach Abschnitten gegliedert – tippe eine Überschrift zum Auf-/Zuklappen.</div><div style="max-height:70vh;overflow:auto">${body}</div>`);
+}
+el("btnVorbem").onclick=showVorbemerkungen;
+el("lvTextToggle").onclick=()=>{withLvScrollAnchor(()=>{lvTextMode=(lvTextMode==="kurz")?"lang":"kurz";el("lvTextToggle").textContent=(lvTextMode==="kurz")?"📄 Langtext":"📄 Kurztext";renderLV();});};
+el("btnNewRahmen").onclick=()=>{
+  DB.rahmen=DB.rahmen||[];
+  const nn=prompt("Name des Rahmenvertrags:","Rahmenvertrag "+(DB.rahmen.length+1));
+  if(nn===null)return;
+  const r={id:uid(),name:nn||("Rahmenvertrag "+(DB.rahmen.length+1)),lv:[],vorbemerkungen:[]};
+  DB.rahmen.push(r);saveDB();renderProjekte();toast("Rahmenvertrag angelegt – jetzt „⤒ LV“ importieren oder oben als LV-Quelle wählen");
+};
+el("btnClearLV").onclick=()=>{
+  const b=bau();const hasR=!!rahmenOf(b);
+  if(!b.lv.length){toast(hasR?"Keine lokalen Positionen (Rahmen-LV bleibt erhalten)":"LV ist bereits leer");return;}
+  const used=allAuf(b).filter(a=>a.lvId&&b.lv.some(x=>x.id===a.lvId)).length;
+  const msg=(hasR?"Lokale Positionen dieses Baus löschen ("+b.lv.length+" Pos., Nachträge/manuelle)? Das Rahmenvertrags-LV bleibt erhalten.":"Gesamtes Leistungsverzeichnis löschen ("+b.lv.length+" Positionen)?")
+    +(used?"\n\n"+used+" Aufmaßzeile(n) verlieren ihre Zuordnung – die Zeilen selbst bleiben erhalten und werden „nicht zugeordnet“.":"");
+  if(confirm(msg)){
+    const ids=new Set(b.lv.map(x=>x.id));
+    b.lv=[];b.aufmasse.forEach(au=>(au.auf||[]).forEach(a=>{if(ids.has(a.lvId))a.lvId=null;}));
+    saveDB();renderLV();renderAuf();renderStats();toast(hasR?"Lokale Positionen geleert":"LV geleert");
+  }
+};
+el("fileInput").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{startImport(rd.result,f.name);}
+    catch(err){console.error(err);alert("Import-Fehler: "+((err&&err.message)||err));}
+    e.target.value="";
+  };
+  rd.onerror=()=>{alert("Datei konnte nicht gelesen werden: "+f.name);};
+  rd.readAsText(f,"utf-8");
+});
+function detectDelimiter(text){
+  const line=text.split(/\r?\n/).find(l=>l.trim())||"";
+  const cand=[[";",(line.match(/;/g)||[]).length],[",",(line.match(/,/g)||[]).length],["\t",(line.match(/\t/g)||[]).length]];
+  cand.sort((a,b)=>b[1]-a[1]);
+  return cand[0][1]>0?cand[0][0]:";";
+}
+function parseCSV(text,delim){
+  text=text.replace(/^\uFEFF/,"");
+  const rows=[];let row=[],val="",q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){val+='"';i++;} else q=false; }
+      else val+=c;
+    }else{
+      if(c==='"')q=true;
+      else if(c===delim){row.push(val);val="";}
+      else if(c==="\n"){row.push(val);rows.push(row);row=[];val="";}
+      else if(c==="\r"){}
+      else val+=c;
+    }
+  }
+  if(val!==""||row.length){row.push(val);rows.push(row);}
+  return rows.filter(r=>r.some(c=>c.trim()!==""));
+}
+let importState=null;
+function startImport(text,fname){
+  if(/<GAEB[\s>]/.test(text)||/GAEB_DA_XML/.test(text)){startGaebImport(text,fname);return;}
+  const delim=detectDelimiter(text);
+  const rows=parseCSV(text,delim);
+  if(!rows.length){toast("Datei ist leer");return;}
+  importState={rows,delim,fname};
+  const header=rows[0];
+  const guess=(keys)=>{
+    for(let i=0;i<header.length;i++){const h=header[i].toLowerCase();if(keys.some(k=>h.includes(k)))return i;}
+    return -1;
+  };
+  const gOZ=guess(["oz","pos","nr","ordnungs"]);
+  const gKT=guess(["kurztext","bezeich","kurzbesch","beschreib","leistung","titel"]);
+  const gLT=guess(["langtext","ausführ"]);
+  const gEH=guess(["einheit","eh","me","mengenein"]);
+  const gMG=guess(["menge","mng","anzahl"]);
+  const gEP=guess(["einheitspreis","ep","e-preis","vk","preis","eur/","euro"]);
+  const opts=(sel)=>header.map((h,i)=>`<option value="${i}" ${i===sel?"selected":""}>${esc(h||("Spalte "+(i+1)))}</option>`).join("");
+  const noneOpt=`<option value="-1">— keine —</option>`;
+  openModal(`<h2>LV importieren <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="filechip">📄 ${esc(fname)} · ${rows.length-1} Zeilen · Trenner „${delim==="\t"?"Tab":delim}“</div>
+    <div class="sub" style="margin:12px 0 6px">Ordne die Spalten zu. Vorschau unten.</div>
+    ${targetIsRahmen()?`<div class="lockbanner ro" style="margin-bottom:10px"><span>📑 Ziel: <b>Rahmenvertrag „${esc(lvImportTarget().name)}"</b> – der Import gilt für alle damit verknüpften Bauten.</span></div>`:""}
+    <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px">
+      <input type="checkbox" id="hasHeader" checked> erste Zeile ist Überschrift</label>
+    ${lvImportTarget().lv.length?`<label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;color:var(--bad)">
+      <input type="checkbox" id="replaceLV" checked> bestehendes ${targetIsRahmen()?"Rahmen-":""}LV (${lvImportTarget().lv.length} Pos.) vorher löschen</label>`:""}
+    <div class="mapgrid">
+      <label>OZ / Pos.</label><select class="ipt" id="mOZ">${noneOpt}${opts(gOZ)}</select>
+      <label>Kurztext</label><select class="ipt" id="mKT">${noneOpt}${opts(gKT)}</select>
+      <label>Langtext</label><select class="ipt" id="mLT">${noneOpt}${opts(gLT)}</select>
+      <label>Einheit</label><select class="ipt" id="mEH">${noneOpt}${opts(gEH)}</select>
+      <label>Menge LV</label><select class="ipt" id="mMG">${noneOpt}${opts(gMG)}</select>
+      <label>EP / Einheitspreis</label><select class="ipt" id="mEP">${noneOpt}${opts(gEP)}</select>
+    </div>
+    <div id="importPreview"></div>
+    <button class="btn primary block" id="doImport" style="margin-top:10px">Importieren</button>`);
+  ["mOZ","mKT","mLT","mEH","mMG","mEP","hasHeader"].forEach(id=>el(id).addEventListener("change",importPreview));
+  importPreview();
+  el("doImport").onclick=doImport;
+}
+function importPreview(){
+  const {rows}=importState;
+  const head=el("hasHeader").checked;
+  const start=head?1:0;
+  const cOZ=+el("mOZ").value,cKT=+el("mKT").value,cLT=+el("mLT").value,cEH=+el("mEH").value,cMG=+el("mMG").value,cEP=+el("mEP").value;
+  const short=s=>{s=String(s||"").replace(/\s+/g," ").trim();return s.length>60?s.slice(0,60)+"…":s;};
+  const sample=rows.slice(start,start+3);
+  let h=`<div class="hint" style="margin-bottom:4px">Vorschau (${Math.max(rows.length-start,0)} Positionen):</div><div class="tablewrap"><table class="lv" style="min-width:0"><thead><tr><th>OZ</th><th>Kurztext</th>${cLT>=0?"<th>Langtext</th>":""}<th class="r">EH</th><th class="r">Menge</th><th class="r">EP</th></tr></thead><tbody>`;
+  sample.forEach(r=>{
+    h+=`<tr><td class="oz">${esc(cOZ>=0?r[cOZ]||"":"")}</td><td class="kt">${esc(cKT>=0?r[cKT]||"":"—")}</td>${cLT>=0?`<td style="font-size:12px;color:var(--ink-soft)">${esc(short(r[cLT]))}</td>`:""}<td class="r">${esc(cEH>=0?r[cEH]||"":"")}</td><td class="r num">${cMG>=0?fmt(parseDE(r[cMG])):""}</td><td class="r num">${cEP>=0?fmtEUR(parseMoney(r[cEP])):""}</td></tr>`;
+  });
+  h+=`</tbody></table></div>${cLT>=0?'<div class="hint" style="margin-top:4px">Langtext gekürzt dargestellt – vollständig wird er gespeichert und ist beim Antippen der Position sichtbar.</div>':""}`;
+  el("importPreview").innerHTML=h;
+}
+function doImport(){
+  const {rows}=importState;
+  const head=el("hasHeader").checked;
+  const start=head?1:0;
+  const cOZ=+el("mOZ").value,cKT=+el("mKT").value,cLT=+el("mLT").value,cEH=+el("mEH").value,cMG=+el("mMG").value,cEP=+el("mEP").value;
+  if(cOZ<0&&cKT<0){toast("Bitte mindestens OZ oder Kurztext zuordnen");return;}
+  const tgt=lvImportTarget();let n=0;        // Rahmen-LV wenn verknüpft, sonst Bau
+  const rep=el("replaceLV");
+  if(rep&&rep.checked){const old=new Set(tgt.lv.map(x=>x.id));tgt.lv=[];DB.bauten.forEach(b=>b.aufmasse.forEach(au=>(au.auf||[]).forEach(a=>{if(old.has(a.lvId))a.lvId=null;})));}
+  for(let i=start;i<rows.length;i++){
+    const r=rows[i];
+    const oz=cOZ>=0?(r[cOZ]||"").trim():"";
+    const kt=cKT>=0?(r[cKT]||"").trim():"";
+    if(!oz&&!kt)continue;
+    tgt.lv.push({id:uid(),oz,kurztext:kt,langtext:cLT>=0?(r[cLT]||"").trim():"",
+      einheit:cEH>=0?(r[cEH]||"").trim():"",mengeLv:cMG>=0?parseDE(r[cMG]):null,ep:cEP>=0?parseMoney(r[cEP]):null,source:"import"});
+    n++;
+  }
+  saveDB();closeModal();renderLV();renderAuf();renderStats();renderProjekte();
+  const wasR=targetIsRahmen();importTargetOverride=null;
+  toast(n+" Positionen importiert"+(wasR?" (Rahmenvertrag)":""));
+}
+
+/* ======================= GAEB DA XML Import (X81/X83/X84/X86, Version 3.x) ======================= */
+let gaebState=null;
+function gaebRichText(elm,keepBreaks){
+  if(!elm)return "";
+  let out="";
+  (function rec(n){
+    for(const c of n.childNodes){
+      if(c.nodeType===3)out+=c.nodeValue;
+      else if(c.nodeType===1){
+        const t=(c.localName||"").toLowerCase();
+        if(t==="br")out+="\n";
+        rec(c);
+        if(t==="p"||t==="li")out+="\n";
+      }
+    }
+  })(elm);
+  out=out.replace(/\u00a0/g," ");
+  if(keepBreaks)return out.replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+  return out.replace(/\s+/g," ").trim();
+}
+function gaebFirstDesc(item,localName){ // erstes Nachfahren-Element mit passendem localName
+  const list=item.getElementsByTagName("*");
+  for(let i=0;i<list.length;i++){if((list[i].localName||"")===localName)return list[i];}
+  return null;
+}
+function gaebChildText(item,localName){
+  for(const c of item.children){if((c.localName||"")===localName)return c.textContent.trim();}
+  return "";
+}
+function gaebParse(text){
+  const doc=new DOMParser().parseFromString(text,"application/xml");
+  if(doc.getElementsByTagName("parsererror").length)throw new Error("XML nicht lesbar");
+  const all=doc.getElementsByTagName("*");
+  const byLocal=(name)=>{const r=[];for(let i=0;i<all.length;i++)if((all[i].localName||"")===name)r.push(all[i]);return r;};
+  const root=byLocal("GAEB")[0];if(!root)throw new Error("Keine GAEB-Datei");
+  const version=(byLocal("Version")[0]||{}).textContent||"";
+  const dp=(byLocal("DP")[0]||{}).textContent||"";
+  const boq=byLocal("BoQ")[0];if(!boq)throw new Error("Kein Leistungsverzeichnis (BoQ) gefunden");
+  // Ebenenlängen
+  const catLens=[];let itemLen=4;
+  byLocal("BoQBkdn").forEach(bk=>{
+    let ty="",ln=0;
+    for(const c of bk.children){if(c.localName==="Type")ty=c.textContent.trim();if(c.localName==="Length")ln=parseInt(c.textContent)||0;}
+    if(ty==="BoQLevel")catLens.push(ln); else if(ty==="Item")itemLen=ln||4;
+  });
+  const pad=(s,l)=>{s=String(s||"").trim();return l&&s.length<l?("0".repeat(l-s.length)+s):s;};
+  const positions=[];
+  function ctgyTitle(ch){ // direkter LblTx der Kategorie
+    for(const c of ch.children){if((c.localName||"")==="LblTx")return gaebRichText(c,false);}
+    return "";
+  }
+  function pushItem(item,stack,titles){
+    const rno=item.getAttribute("RNoPart")||"0";
+    const oz=stack.map(x=>pad(x.rno,x.len)).concat(pad(rno,itemLen)).join(".");
+    const qtyT=gaebChildText(item,"Qty");
+    const qu=gaebChildText(item,"QU");
+    const upT=gaebChildText(item,"UP");
+    const outl=gaebFirstDesc(item,"OutlineText");
+    const detail=gaebFirstDesc(item,"DetailTxt");
+    const kurz=gaebRichText(outl,false);
+    const lang=gaebRichText(detail,true);
+    positions.push({
+      oz,
+      kurztext:kurz,
+      langtext:(lang&&lang!==kurz)?lang:(lang||""),
+      einheit:qu||"",
+      mengeLv:qtyT?parseFloat(qtyT.replace(",",".")):null,
+      ep:upT?parseFloat(upT.replace(",",".")):null,
+      gruppe:titles.filter(Boolean).join(" › ")
+    });
+  }
+  const vorbem=[];
+  function pushRemark(elm,titles){
+    const outl=gaebFirstDesc(elm,"OutlineText");
+    const titel=gaebRichText(outl,false);
+    const text=gaebRichText(elm,true);
+    if(titel||text)vorbem.push({gruppe:titles.filter(Boolean).join(" › "),titel:titel||"",text:text||""});
+  }
+  function walk(node,stack,titles){
+    for(const ch of node.children){
+      const t=ch.localName||"";
+      if(t==="BoQCtgy"){
+        const rno=ch.getAttribute("RNoPart")||"0";
+        const len=catLens[stack.length]||2;
+        let body=null;for(const c of ch.children)if(c.localName==="BoQBody")body=c;
+        walk(body||ch,stack.concat([{rno,len}]),titles.concat([ctgyTitle(ch)]));
+      }else if(t==="BoQBody"){walk(ch,stack,titles);}
+      else if(t==="Remark"||t==="Note"){pushRemark(ch,titles);}
+      else if(t==="Itemlist"){
+        for(const it of ch.children){
+          const it_t=it.localName||"";
+          if(it_t==="Item"||it_t==="LumpSumItem")pushItem(it,stack,titles);
+          else if(it_t==="Remark"||it_t==="Note")pushRemark(it,titles);
+        }
+      }
+    }
+  }
+  let body=null;for(const c of boq.children)if(c.localName==="BoQBody")body=c;
+  if(body)walk(body,[],[]);
+  const hasText=positions.some(p=>p.kurztext||p.langtext);
+  const hasPrice=positions.some(p=>p.ep!=null);
+  return {version,dp,positions,hasText,hasPrice,vorbem};
+}
+function startGaebImport(text,fname){
+  let g;try{g=gaebParse(text);}catch(e){console.error(e);alert("GAEB-Datei konnte nicht gelesen werden:\n"+((e&&e.message)||e)+"\n\nBitte schick mir die Datei, dann passe ich den Import an.");return;}
+  if(!g.positions.length){alert("Die GAEB-Datei wurde erkannt, aber es wurden keine Positionen gefunden ("+(g.dp?"DA"+g.dp+", v"+g.version:"unbekannt")+"). Bitte schick mir die Datei.");return;}
+  gaebState=g;
+  const tgt=lvImportTarget();
+  const kind=g.hasText&&g.hasPrice?"Texte und Preise":(g.hasText?"Texte, Mengen, Einheiten (keine Preise)":(g.hasPrice?"Preise und Mengen (keine Texte)":"Positionen"));
+  const canMerge=tgt.lv.length>0;
+  const sample=g.positions.slice(0,3).map(p=>`<tr><td class="oz">${esc(p.oz)}</td><td class="kt">${esc(p.kurztext||"—")}</td><td class="r">${esc(p.einheit||"")}</td><td class="r num">${p.mengeLv!=null?fmt(p.mengeLv):""}</td><td class="r num">${p.ep!=null?fmtEUR(p.ep):""}</td></tr>`).join("");
+  openModal(`<h2>GAEB-Import (DA${esc(g.dp||"")} · v${esc(g.version||"")}) <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="filechip">📄 ${esc(fname)} · ${g.positions.length} Positionen · ${esc(kind)}${g.vorbem&&g.vorbem.length?" · "+g.vorbem.length+" Vorbemerkungen":""}</div>
+    ${targetIsRahmen()?`<div class="lockbanner ro" style="margin:10px 0"><span>📑 Ziel: <b>Rahmenvertrag „${esc(tgt.name)}"</b> – gilt für alle verknüpften Bauten.</span></div>`:""}
+    <div class="fld" style="margin-top:10px"><span class="fld-label">Wie importieren?</span>
+      <label class="chkline"><input type="radio" name="gMode" value="replace" ${canMerge?"":"checked"}> Als neues LV anlegen${canMerge?" (bestehende "+tgt.lv.length+" Pos. ersetzen)":""}</label>
+      ${canMerge?`<label class="chkline"><input type="radio" name="gMode" value="merge" checked> Mit bestehendem LV über die OZ zusammenführen (z. B. Preise aus X84 in vorhandene Positionen übernehmen)</label>`:""}
+    </div>
+    <div class="hint">Vorschau (erste 3):</div>
+    <div class="tablewrap"><table class="lv" style="min-width:0"><thead><tr><th>OZ</th><th>Kurztext</th><th class="r">EH</th><th class="r">Menge</th><th class="r">EP</th></tr></thead><tbody>${sample}</tbody></table></div>
+    <button class="btn primary block" id="doGaeb" style="margin-top:12px">Importieren</button>`);
+  el("doGaeb").onclick=doGaebImport;
+}
+function doGaebImport(){
+ try{
+  const g=gaebState;if(!g){alert("Keine GAEB-Daten geladen – bitte Datei erneut wählen.");return;}
+  let mode="replace";
+  const modeEl=document.querySelector('input[name="gMode"]:checked');
+  if(modeEl)mode=modeEl.value;
+  const tgt=lvImportTarget();
+  let added=0,updated=0;
+  if(!Array.isArray(tgt.vorbemerkungen))tgt.vorbemerkungen=[];
+  if(g.vorbem&&g.vorbem.length){
+    const len=arr=>arr.reduce((s,v)=>s+((v.text||"").length)+((v.titel||"").length),0);
+    if(mode==="replace"||len(g.vorbem)>len(tgt.vorbemerkungen))tgt.vorbemerkungen=g.vorbem.slice();
+  }
+  if(mode==="replace"){
+    const old=new Set(tgt.lv.map(x=>x.id));
+    tgt.lv=[];DB.bauten.forEach(b=>b.aufmasse.forEach(au=>(au.auf||[]).forEach(a=>{if(old.has(a.lvId))a.lvId=null;})));
+    g.positions.forEach(p=>{tgt.lv.push({id:uid(),oz:p.oz,kurztext:p.kurztext,langtext:p.langtext,einheit:p.einheit,mengeLv:p.mengeLv,ep:p.ep,gruppe:p.gruppe||"",source:"import"});added++;});
+  }else{
+    const byOz={};tgt.lv.forEach(x=>{if(x.oz)byOz[String(x.oz).trim()]=x;});
+    g.positions.forEach(p=>{
+      const ex=byOz[String(p.oz).trim()];
+      if(ex){
+        if(p.ep!=null)ex.ep=p.ep;
+        if(p.kurztext&&!ex.kurztext)ex.kurztext=p.kurztext;
+        if(p.langtext&&!ex.langtext)ex.langtext=p.langtext;
+        if(p.einheit&&!ex.einheit)ex.einheit=p.einheit;
+        if(p.gruppe&&!ex.gruppe)ex.gruppe=p.gruppe;
+        if(p.mengeLv!=null&&ex.mengeLv==null)ex.mengeLv=p.mengeLv;
+        updated++;
+      }else{
+        tgt.lv.push({id:uid(),oz:p.oz,kurztext:p.kurztext,langtext:p.langtext,einheit:p.einheit,mengeLv:p.mengeLv,ep:p.ep,gruppe:p.gruppe||"",source:"import"});added++;
+      }
+    });
+  }
+  const wasR=targetIsRahmen();
+  saveDB();closeModal();renderLV();renderAuf();renderStats();renderProjekte();
+  gaebState=null;importTargetOverride=null;
+  toast("GAEB importiert: "+(updated?updated+" aktualisiert":"")+(updated&&added?", ":"")+(added?added+" neu":"")+(wasR?" (Rahmenvertrag)":""));
+ }catch(err){console.error(err);alert("Import fehlgeschlagen: "+((err&&err.message)||err));}
+}
+
+let afLvSelected=null;         // chosen lv id in the form
+let afIsNachtrag=false;        // create as Nachtragsposition on save
+let afGroup=false;
+let afRoomsSelected=new Set(); // mehrere Räume gleichzeitig
+
+function getRooms(b){b=b||bau();if(!Array.isArray(b.raeume))b.raeume=[];return b.raeume;}
+function allAuf(b){b=b||bau();return b.aufmasse.reduce((acc,a)=>acc.concat(a.auf),[]);}
+function addRoom(name){
+  name=(name||"").trim();if(!name)return;
+  const r=getRooms();
+  if(!r.includes(name)){r.push(name);saveDB();}
+}
+function renderRoomChips(){
+  const rooms=getRooms();
+  const box=el("afRooms");
+  [...afRoomsSelected].forEach(r=>{if(!rooms.includes(r))afRoomsSelected.delete(r);});
+  if(!rooms.length){box.innerHTML='<span class="hint" style="margin:0">Noch keine Räume – unten anlegen oder Namen eintippen.</span>';return;}
+  box.innerHTML=rooms.map((r,i)=>`<button type="button" class="room-chip ${afRoomsSelected.has(r)?'on':''}" data-i="${i}">${esc(r)}</button>`).join("");
+  box.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{
+    const r=rooms[+b.dataset.i];
+    if(afRoomsSelected.has(r))afRoomsSelected.delete(r);else afRoomsSelected.add(r);
+    renderRoomChips();
+  });
+}
+function manageRooms(){
+  const b=bau();
+  openModal(`<h2>Räume verwalten <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="sub" style="margin-bottom:10px">Räume dieses Baus anlegen, umbenennen oder löschen. Umbenennen ändert auch bestehende Aufmaßzeilen (alle Aufmaße des Baus).</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input class="ipt" id="mrNew" placeholder="Raum hinzufügen …"><button class="btn primary sm" id="mrAdd">＋</button>
+    </div>
+    <div id="mrList"></div>`);
+  const draw=()=>{
+    const rl=getRooms(b);
+    el("mrList").innerHTML=rl.length?rl.map((r,i)=>`<div class="listrow">
+      <input class="ipt" data-ren="${i}" value="${esc(r)}" style="flex:1">
+      <button class="iconbtn del" data-del="${i}" title="Löschen">🗑</button></div>`).join(""):`<div class="empty"><p>Noch keine Räume.</p></div>`;
+    el("mrList").querySelectorAll("[data-del]").forEach(btn=>btn.onclick=()=>{
+      const name=getRooms(b)[+btn.dataset.del];
+      getRooms(b).splice(+btn.dataset.del,1);afRoomsSelected.delete(name);
+      saveDB();draw();renderRoomChips();renderProjekte();
+    });
+    el("mrList").querySelectorAll("[data-ren]").forEach(inp=>inp.onchange=()=>{
+      const i=+inp.dataset.ren,old=getRooms(b)[i],nw=inp.value.trim();
+      if(!nw){inp.value=old;return;}
+      if(getRooms(b).includes(nw)&&nw!==old){toast("Raum existiert bereits");inp.value=old;return;}
+      getRooms(b)[i]=nw;
+      b.aufmasse.forEach(au=>(au.auf||[]).forEach(a=>(a.rooms||[]).forEach(rr=>{if(rr.raum===old)rr.raum=nw;})));
+      if(afRoomsSelected.has(old)){afRoomsSelected.delete(old);afRoomsSelected.add(nw);}
+      saveDB();renderRoomChips();renderAuf();refreshDatalists();
+    });
+  };
+  el("mrAdd").onclick=()=>{const v=el("mrNew").value.trim();if(v){addRoom(v);el("mrNew").value="";draw();renderRoomChips();renderProjekte();}el("mrNew").focus();};
+  el("mrNew").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();el("mrAdd").click();}});
+  draw();
+}
+el("afAddRoom").onclick=()=>{const v=el("afNewRoom").value.trim();if(!v)return;addRoom(v);afRoomsSelected.add(v);el("afNewRoom").value="";renderRoomChips();renderStats();};
+el("afClearRooms").onclick=()=>{if(!afRoomsSelected.size){toast("Keine Räume ausgewählt");return;}afRoomsSelected.clear();renderRoomChips();};
+el("afNewRoom").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();el("afAddRoom").click();}});
+el("afManageRooms").onclick=manageRooms;
+
+function createNachtrag(kurztext,einheit){
+  const n=bau().lv.filter(x=>x.source==="nachtrag").length+1;
+  const id=uid();
+  bau().lv.push({id,oz:"N"+n,kurztext:(kurztext||"").trim()||("Nachtrag "+n),langtext:"",
+    einheit:einheit||"",mengeLv:null,source:"nachtrag"});
+  return id;
+}
+el("afGroupToggle").onclick=()=>{afGroup=!afGroup;el("afGroupToggle").classList.toggle("on",afGroup);renderAuf();};
+let afAllView=false;
+el("afAllToggle").onclick=()=>{afAllView=!afAllView;el("afAllToggle").classList.toggle("on",afAllView);el("afGroupToggle").style.display=afAllView?"none":"";renderAuf();};
+el("afFilter").addEventListener("input",renderAuf);
+el("afFormel").addEventListener("input",()=>{
+  const v=evalFormel(el("afFormel").value);
+  el("afMenge").value=(v==null)?"":(isNaN(v)?"Fehler":fmt(v));
+});
+el("afLvBtn").onclick=()=>{
+  if(afLvSelected){afLvSelected=null;updateAfLvBtn();return;}
+  openLvPicker(id=>{afLvSelected=id;afIsNachtrag=false;const u=lvUnit(id);if(u)el("afEinheit").value=u;updateAfLvBtn();});
+};
+el("afNachtrag").onclick=()=>{
+  afIsNachtrag=!afIsNachtrag;
+  if(afIsNachtrag)afLvSelected=null;
+  updateAfLvBtn();
+};
+function afVorbemGruppe(){
+  if(afLvSelected){const r=LV().find(x=>x.id===afLvSelected);if(r)return r.gruppe||"";}
+  return null;
+}
+let afVorbemOpen=false;
+function renderAfVorbem(){
+  const panel=el("afVorbem"),btn=el("afVorbemToggle");
+  if(!panel||!btn)return;
+  const total=vorbemAll().length;
+  btn.style.display=total?"":"none";
+  if(!total){panel.style.display="none";afVorbemOpen=false;return;}
+  const g=afVorbemGruppe();
+  const list=(g!=null)?vorbemFor(g):vorbemAll();
+  btn.textContent=(afVorbemOpen?"📄 Vorbemerkungen ausblenden":"📄 Vorbemerkungen"+(g!=null?" zu diesem Abschnitt":"")+" ("+list.length+")");
+  panel.style.display=afVorbemOpen?"block":"none";
+  if(afVorbemOpen)panel.innerHTML=vorbemGroupedHtml(list,true);
+}
+function updateAfLvBtn(){
+  const b=el("afLvBtn"),nt=el("afNachtrag"),hint=el("afAssignHint");
+  nt.classList.toggle("nachtrag-on",afIsNachtrag);
+  b.classList.remove("chosen");
+  if(afLvSelected){
+    const r=LV().find(x=>x.id===afLvSelected);
+    if(!r){afLvSelected=null;return updateAfLvBtn();}
+    b.classList.add("chosen");
+    b.innerHTML=`↳ ${esc(r.oz||"")} ${esc(r.kurztext||"")} <span style="margin-left:auto;color:var(--bad)">✕</span>`;
+    hint.textContent="Zugeordnet. Tippen zum Aufheben.";
+  }else if(afIsNachtrag){
+    b.textContent="LV-Position zuordnen …";
+    hint.innerHTML="Wird als <b>Nachtragsposition</b> ins LV aufgenommen (OZ „N…“).";
+  }else{
+    b.textContent="LV-Position zuordnen …";
+    hint.textContent="Ohne Zuordnung bleibt die Zeile „nicht zugeordnet“ – später zuweisbar.";
+  }
+  renderAfVorbem();
+}
+el("afVorbemToggle").onclick=()=>{afVorbemOpen=!afVorbemOpen;renderAfVorbem();};
+el("afLvBtn").addEventListener("contextmenu",e=>e.preventDefault());
+el("afMultiLv").onclick=openMultiLvPicker;
+
+el("afAdd").onclick=()=>{
+  const name=el("afName").value.trim();
+  const formel=el("afFormel").value.trim();
+  const menge=evalFormel(formel);
+  const teil=(el("afTeil").value||"").trim();
+  // Räume sammeln: ausgewählte Chips + ggf. eingetippter neuer Raum
+  let rooms=[...afRoomsSelected];
+  const typed=el("afNewRoom").value.trim();
+  if(typed){addRoom(typed);if(!rooms.includes(typed))rooms.push(typed);el("afNewRoom").value="";}
+  rooms=[...new Set(rooms)];
+  if(!name&&rooms.length===0){toast("Bitte Kurztext oder mindestens einen Raum angeben");return;}
+  if(menge!=null&&isNaN(menge)){toast("Formel ungültig");return;}
+  const mengeVal=menge==null?0:menge;
+  let eh=el("afEinheit").value.trim();
+  const willNachtrag=!afLvSelected&&afIsNachtrag;
+  if(willNachtrag&&!name){toast("Für einen Nachtrag bitte einen Kurztext schreiben");return;}
+  // 0-Abfrage VOR jeder Änderung – aber nicht für Nachträge (Position wird bewusst angelegt)
+  if(mengeVal===0&&!willNachtrag){ if(!confirm("Die Menge ist 0. Position trotzdem hinzufügen?"))return; }
+  let lvId=afLvSelected;
+  if(willNachtrag)lvId=createNachtrag(name,eh);
+  const u=lvUnit(lvId);if(u)eh=u;            // Einheit immer aus der LV-Position übernehmen
+  if(!eh&&lvId){const r=LV().find(x=>x.id===lvId);if(r)eh=r.einheit||"";}
+  const targets=rooms.length?rooms:[""];
+  targets.forEach(t=>{if(t)addRoom(t);});
+
+  // Bereits vorhandene Position? -> keine zweite Zeile (nicht für den gerade erzeugten Nachtrag)
+  if(lvId&&!willNachtrag){
+    const existing=af().auf.find(x=>x.lvId===lvId);
+    if(existing){
+      let added=0;
+      targets.forEach(room=>{
+        if(!(existing.rooms||[]).some(r=>r.raum===room&&(r.teil||"")===teil)){
+          (existing.rooms=existing.rooms||[]).push({raum:room,teil:teil,formel:formel,menge:mengeVal});added++;
+        }
+      });
+      if(!existing.einheit&&eh)existing.einheit=eh;
+      saveDB();
+      el("afName").value="";el("afFormel").value="";el("afMenge").value="";el("afNotiz").value="";
+      afLvSelected=null;afIsNachtrag=false;updateAfLvBtn();
+      renderAuf();renderStats();renderLV();renderRoomChips();refreshDatalists();
+      toast(added?("Position war schon erfasst – "+added+" Raum/Räume ergänzt"):"Position war schon erfasst – wird geöffnet");
+      editAuf(existing.id);
+      return;
+    }
+  }
+
+  const notiz=el("afNotiz").value.trim();
+  const roomRows=targets.map(room=>({raum:room,teil:teil,formel:formel,menge:mengeVal}));
+  const newEntry={id:uid(),bezeichnung:name,einheit:eh,lvId:lvId,notiz:notiz,createdAt:Date.now(),rooms:roomRows};
+  if(aufSent()){newEntry.aufgemessen=0;newEntry.korrektur={grund:"nachträglich erfasst",datum:todayStr(),vorher:0,offen:false};}
+  af().auf.push(newEntry);
+  saveDB();
+  // nach dem Hinzufügen zurücksetzen: Kurztext, Formel, Notiz UND LV-Zuordnung/Nachtrag.
+  // Räume bleiben gewählt (für Wiederholbauteile über mehrere Räume).
+  el("afName").value="";el("afFormel").value="";el("afMenge").value="";el("afNotiz").value="";
+  afLvSelected=null;afIsNachtrag=false;updateAfLvBtn();
+  el("afName").focus();
+  renderAuf();renderStats();renderLV();renderRoomChips();refreshDatalists();
+  toast(targets.length>1?"Zeile mit "+targets.length+" Räumen hinzugefügt":"Hinzugefügt");
+};
+
+function lvLabel(id){
+  if(!id)return null;
+  const r=LV().find(x=>x.id===id);if(!r)return null;
+  const oz=r.ozOffiziell||r.oz||"";
+  const kt=r.bezOffiziell||r.kurztext||"";
+  return ((oz?oz+" ":"")+kt).trim();
+}
+function lvUnit(id){const r=id?LV().find(x=>x.id===id):null;return r&&r.einheit?r.einheit:null;}
+function applyFormLock(){
+  const ro=aufLocked();
+  const f=el("afForm");if(f)f.classList.toggle("locked-form",ro);
+  ["afMultiLv","afAdd"].forEach(id=>{const b=el(id);if(b)b.disabled=ro;});
+}
+function lockBannerHTML(){
+  if(!aufSent())return `<div class="lockbanner open"><span><b>Status: offen</b> – frei bearbeitbar.</span><button class="btn sm" id="aufLock">🔒 Als gesendet markieren</button></div>`;
+  if(korrMode)return `<div class="lockbanner korr"><span><b>Korrekturmodus aktiv.</b> Aufgemessene Mengen bleiben fest; Änderungen zählen als Korrektur (mit Begründung). Die Differenz wird angezeigt.</span><button class="btn sm" id="korrEnd">Korrektur beenden</button></div>`;
+  return `<div class="lockbanner ro"><span><b>🔒 Gesendet${af().sentAt?" am "+esc(af().sentAt):""}.</b> Schreibgeschützt – aufgemessene Mengen fest.</span><button class="btn sm" id="korrStart">Zur Korrektur entsperren</button><button class="btn sm ghost" id="fullUnlock">Sperre ganz aufheben</button></div>`;
+}
+function bindLockBanner(){
+  const lk=el("aufLock");if(lk)lk.onclick=()=>{
+    if(confirm('„'+af().name+'“ als gesendet markieren und sperren? Die aufgemessenen Mengen werden festgehalten. Änderungen danach nur über „Zur Korrektur entsperren“.')){markAufSent(af());korrMode=false;saveDB();renderAll();toast("Aufmaß gesperrt");}
+  };
+  const s=el("korrStart");if(s)s.onclick=()=>{korrMode=true;renderAuf();toast("Korrekturmodus aktiv");};
+  const e=el("korrEnd");if(e)e.onclick=()=>{korrMode=false;renderAuf();makeBackup("Korrektur beendet");toast("Korrektur beendet – wieder gesperrt");};
+  const fu=el("fullUnlock");if(fu)fu.onclick=()=>{
+    if(confirm('Sperre VOLLSTÄNDIG aufheben?\n\nDas ursprünglich Aufgemessene wird verworfen und das Aufmaß wieder frei bearbeitbar (Neu-Aufmessen). Nur nutzen, wenn du vor der Rechnung wirklich neu aufmessen willst.')){makeBackup("vor vollständigem Entsperren");fullUnlock(af());korrMode=false;saveDB();renderAll();toast("Sperre vollständig aufgehoben");}
+  };
+}
+function offeneKlaerungen(){
+  const b=bau();const out=[];
+  b.aufmasse.forEach(a=>(a.auf||[]).forEach(e=>{if(e.korrektur&&e.korrektur.offen)out.push({aufId:a.id,aufName:a.name,e,pos:e.lvId?lvAll(b).find(x=>x.id===e.lvId):null});}));
+  return out;
+}
+function klaerBannerHTML(){
+  const ks=offeneKlaerungen();if(!ks.length)return"";
+  const items=ks.map(k=>{
+    const lbl=k.pos?lvLabel(k.e.lvId):(k.e.bezeichnung||"—");
+    const kk=k.e.korrektur,eh=esc(k.e.einheit||"");
+    const vh=kk.vorher!=null?("vorher "+fmt(kk.vorher)+" "+eh+" → "+fmt(entryTotal(k.e))+" "+eh+" · "):"";
+    return `<div class="klaer-item">
+      <div class="ki-main"><b>${esc(lbl)}</b> <span class="ki-auf">aus „${esc(k.aufName)}"</span>
+        <div class="ki-grund">${vh}${esc(kk.grund||"")}</div></div>
+      <div class="ki-acts"><button class="btn sm" data-klaerjump="${k.aufId}|${k.e.id}">Öffnen</button><button class="btn sm ghost" data-klaerok="${k.aufId}|${k.e.id}">geklärt</button></div>
+    </div>`;
+  }).join("");
+  return `<div class="klaerbox"><div class="klaerhd">⚠ ${ks.length} offene Klärung(en) aus früheren Aufmaßen – bis zum Schlussaufmaß erledigen</div>${items}</div>`;
+}
+function bindKlaer(){
+  el("afBody").querySelectorAll("[data-klaerjump]").forEach(btn=>btn.onclick=e=>{
+    e.stopPropagation();const [aid,eid]=btn.dataset.klaerjump.split("|");
+    const b=bau();b.activeAufId=aid;korrMode=true;saveDB();
+    afAllView=false;el("afAllToggle").classList.remove("on");el("afGroupToggle").style.display="";
+    renderAll();editAuf(eid);
+  });
+  el("afBody").querySelectorAll("[data-klaerok]").forEach(btn=>btn.onclick=e=>{
+    e.stopPropagation();const [aid,eid]=btn.dataset.klaerok.split("|");
+    const b=bau();const a=b.aufmasse.find(x=>x.id===aid);const ent=a&&a.auf.find(x=>x.id===eid);
+    if(ent&&ent.korrektur){ent.korrektur.offen=false;saveDB();renderAuf();toast("Als geklärt markiert");}
+  });
+}
+function renderAuf(){
+  if(afAllView){renderAllAufmasse();return;}
+  applyFormLock();
+  const p=af();
+  const banner=klaerBannerHTML()+lockBannerHTML();
+  const q=(el("afFilter").value||"").toLowerCase().trim();
+  let rows=p.auf.slice().reverse();
+  if(q)rows=rows.filter(a=>((a.rooms||[]).map(r=>r.raum).join(" ")+" "+(a.bezeichnung||"")+" "+(a.notiz||"")+" "+(lvLabel(a.lvId)||"")).toLowerCase().includes(q));
+
+  if(!p.auf.length){
+    el("afBody").innerHTML=banner+`<div class="card"><div class="empty"><div class="big">📐</div>
+      <p><b>Noch keine Aufmaßzeilen</b></p><p class="hint">Oben Kurztext, Räume und Menge eingeben.</p></div></div>`;bindLockBanner();bindKlaer();return;
+  }
+  if(!rows.length){el("afBody").innerHTML=banner+`<div class="card"><div class="empty"><p>Keine Treffer.</p></div></div>`;bindLockBanner();bindKlaer();return;}
+
+  let html=banner;
+  if(afGroup){
+    // nach Raum: jede Zeile erscheint je Raum mit dessen Menge
+    const groups={};
+    rows.forEach(a=>(a.rooms||[]).forEach(r=>{const k=r.raum||"(ohne Raum)";(groups[k]=groups[k]||[]).push({a,r});}));
+    Object.keys(groups).sort((x,y)=>x.localeCompare(y,"de")).forEach(k=>{
+      const items=groups[k].slice().sort((p,q)=>String(p.r.teil||"").localeCompare(String(q.r.teil||""),"de"));
+      let sub="";let lastT=null;
+      items.forEach(o=>{
+        const t=o.r.teil||"";
+        if(t!==lastT){if(t)sub+=`<div class="auf-subteil">▸ ${esc(t)}</div>`;else if(lastT!==null)sub+=`<div class="auf-subteil" style="opacity:.6">▸ ohne Teilbereich</div>`;lastT=t;}
+        sub+=rowHTMLForRoom(o.a,o.r);
+      });
+      html+=`<div class="auf-group"><h3>${esc(k)} <span class="cnt">${items.length}</span></h3>${sub}</div>`;
+    });
+  }else{
+    html+=rows.map(rowHTML).join("");
+  }
+  el("afBody").innerHTML=html;
+  bindLockBanner();bindKlaer();
+  el("afBody").querySelectorAll("[data-rowedit]").forEach(r=>r.onclick=()=>editAuf(r.dataset.rowedit));
+  el("afBody").querySelectorAll("[data-edit]").forEach(b=>b.onclick=e=>{e.stopPropagation();editAuf(b.dataset.edit);});
+  el("afBody").querySelectorAll("[data-promote]").forEach(b=>b.onclick=e=>{e.stopPropagation();promoteAuf(b.dataset.promote);});
+  el("afBody").querySelectorAll("[data-assign]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    openLvPicker(id=>{
+      const fromId=b.dataset.assign;
+      const targetId=assignLvDedup(fromId,id);
+      saveDB();renderAuf();renderLV();renderStats();
+      if(targetId&&targetId!==fromId){toast("Position war schon erfasst – Räume zusammengeführt");editAuf(targetId);}
+    });
+  });
+  el("afBody").querySelectorAll("[data-delrow]").forEach(b=>b.onclick=e=>{e.stopPropagation();deleteAufLine(b.dataset.delrow);});
+}
+/* Position einer Zeile zuordnen; existiert sie schon, Räume zusammenführen und Duplikat entfernen.
+   Gibt die id der zu behaltenden Zeile zurück. */
+function assignLvDedup(entryId,lvId){
+  const cur=af();
+  const entry=cur.auf.find(x=>x.id===entryId);
+  if(!entry)return null;
+  const u=lvUnit(lvId);
+  const other=lvId?cur.auf.find(x=>x.lvId===lvId&&x.id!==entryId):null;
+  if(!other){entry.lvId=lvId;if(u)entry.einheit=u;return entryId;}
+  (entry.rooms||[]).forEach(r=>{if(!(other.rooms||[]).some(o=>o.raum===r.raum))(other.rooms=other.rooms||[]).push(r);});
+  if(u)other.einheit=u;else if(!other.einheit&&entry.einheit)other.einheit=entry.einheit;
+  if(!other.notiz&&entry.notiz)other.notiz=entry.notiz;
+  cur.auf=cur.auf.filter(x=>x.id!==entryId);
+  return other.id;
+}
+function renderAllAufmasse(){
+  const b=bau();
+  const q=(el("afFilter").value||"").toLowerCase().trim();
+  let html="";
+  b.aufmasse.forEach(a=>{
+    let entries=(a.auf||[]).slice().reverse();
+    if(q)entries=entries.filter(e=>((e.rooms||[]).map(r=>r.raum).join(" ")+" "+(e.bezeichnung||"")+" "+(e.notiz||"")+" "+(lvLabel(e.lvId)||"")).toLowerCase().includes(q));
+    if(q&&!entries.length)return; // bei Suche leere Aufmaße ausblenden
+    const active=a.id===b.activeAufId;
+    const tot=(a.auf||[]).length;
+    html+=`<div class="aufgrp">
+      <div class="aufgrp-h" data-switch="${a.id}">
+        <span class="nm">${esc(a.name)}${active?' <span class="badge b-ok">aktiv</span>':''}</span>
+        <span class="cnt">${tot} Zeile(n) ›</span>
+      </div>`;
+    if(!entries.length){html+=`<div class="aufgrp-empty">— noch nichts aufgemessen —</div>`;}
+    else entries.forEach(e=>{
+      const lvl=lvLabel(e.lvId);
+      html+=`<div class="auf-row mini" data-jump="${a.id}|${e.id}">
+        <div class="auf-main">
+          <div class="name">${esc(e.bezeichnung||"—")}</div>
+          <div class="meta">${lvl?`<span class="lvref">↳ ${esc(lvl)}</span>`:'<span class="badge b-warn">nicht zugeordnet</span>'}${e.notiz?` <span>📝 ${esc(e.notiz)}</span>`:""}</div>
+          ${roomsChips(e)}
+        </div>
+        <div class="auf-qty">${fmt(entryTotal(e))}<small>${esc(e.einheit||"")}</small></div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  if(!html)html=`<div class="card"><div class="empty"><p>Keine Treffer in allen Aufmaßen.</p></div></div>`;
+  el("afBody").innerHTML=klaerBannerHTML()+html;
+  bindKlaer();
+  el("afBody").querySelectorAll("[data-switch]").forEach(h=>h.onclick=()=>{
+    b.activeAufId=h.dataset.switch;saveDB();
+    afAllView=false;el("afAllToggle").classList.remove("on");el("afGroupToggle").style.display="";
+    renderAll();toast("Aufmaß geöffnet");
+  });
+  el("afBody").querySelectorAll("[data-jump]").forEach(r=>r.onclick=()=>{
+    const [aid,eid]=r.dataset.jump.split("|");
+    b.activeAufId=aid;saveDB();
+    afAllView=false;el("afAllToggle").classList.remove("on");el("afGroupToggle").style.display="";
+    renderAll();editAuf(eid);
+  });
+}
+function deleteAufLine(id){
+  const cur=af();
+  const idx=cur.auf.findIndex(x=>x.id===id);
+  if(idx<0)return;
+  const removed=cur.auf[idx];
+  const aufId=cur.id;
+  cur.auf.splice(idx,1);
+  saveDB();renderAuf();renderStats();renderLV();
+  toastAction("Zeile gelöscht","Rückgängig",()=>{
+    const b=bau();const target=b.aufmasse.find(x=>x.id===aufId)||af();
+    target.auf.splice(Math.min(idx,target.auf.length),0,removed);
+    saveDB();renderAuf();renderStats();renderLV();toast("Wiederhergestellt");
+  });
+}
+function roomsChips(a){
+  return `<div class="auf-rooms">`+(a.rooms||[]).map(r=>`<span class="rm ${r.raum?'':'noroom'}">${r.raum?esc(r.raum):'ohne Raum'}${r.teil?` <span style="opacity:.7">· ${esc(r.teil)}</span>`:""}: <b>${fmt(r.menge)}</b></span>`).join("")+`</div>`;
+}
+function korrNoteHTML(a){
+  if(!a.korrektur)return"";
+  const k=a.korrektur,eh=esc(a.einheit||"");
+  const auf=aufMenge(a),korr=korrMenge(a),d=korr-auf;
+  const dcol=d>0?"var(--warn)":(d<0?"var(--info)":"var(--ink-soft)");
+  const dtxt=(d>0?"+":"")+fmt(d);
+  const qb=k.quelle==="fachplaner"?'<span class="badge b-info">Fachplaner</span>':'<span class="badge b-manuell">eigene Korrektur</span>';
+  return `<div class="korr-note">
+    <div class="korr-grid"><span>Aufgemessen: <b>${fmt(auf)} ${eh}</b></span><span>Korrigiert: <b>${fmt(korr)} ${eh}</b></span><span style="color:${dcol}">Differenz: <b>${dtxt} ${eh}</b></span></div>
+    <div style="margin-top:2px">${qb} ${k.datum?"am "+esc(k.datum)+": ":""}${esc(k.grund||"")}${k.offen?' <span class="badge b-warn">⚠ Einspruch / strittig</span>':""}</div>
+  </div>`;
+}
+function rowHTML(a){
+  const lvl=lvLabel(a.lvId);
+  const total=entryTotal(a);
+  const ro=aufLocked();
+  return `<div class="auf-row ${a.lvId?'':'unassigned'} ${a.korrektur?'changed':''}" ${ro?'':`data-rowedit="${a.id}"`}>
+    <div class="auf-main">
+      <div class="name">${esc(a.bezeichnung||"—")}</div>
+      <div class="meta">
+        ${lvl?`<span class="lvref">↳ ${esc(lvl)}</span>`:`<span class="badge b-warn">nicht zugeordnet</span>`}
+        ${a.notiz?`<span>📝 ${esc(a.notiz)}</span>`:""}
+      </div>
+      ${roomsChips(a)}
+      ${korrNoteHTML(a)}
+    </div>
+    <div class="auf-qty">${fmt(total)}<small>${esc(a.einheit||"")}</small></div>
+    ${ro?"":`<div class="auf-acts">
+      <button class="iconbtn" data-edit="${a.id}" title="Bearbeiten">✎</button>
+      ${a.lvId?"":`<button class="iconbtn" data-assign="${a.id}" title="LV zuordnen">↳</button>
+                   <button class="iconbtn" data-promote="${a.id}" title="Als Nachtragsposition übernehmen">＋</button>`}
+      <button class="iconbtn del" data-delrow="${a.id}" title="Löschen">🗑</button>
+    </div>`}
+  </div>`;
+}
+function rowHTMLForRoom(a,r){
+  const lvl=lvLabel(a.lvId);
+  const ro=aufLocked();
+  return `<div class="auf-row ${a.lvId?'':'unassigned'} ${a.korrektur?'changed':''}" ${ro?'':`data-rowedit="${a.id}"`}>
+    <div class="auf-main">
+      <div class="name">${esc(a.bezeichnung||"—")}</div>
+      <div class="meta">
+        ${lvl?`<span class="lvref">↳ ${esc(lvl)}</span>`:`<span class="badge b-warn">nicht zugeordnet</span>`}
+        ${(a.rooms||[]).length>1?`<span style="color:var(--ink-faint)">+${a.rooms.length-1} weitere(r) Raum/Räume</span>`:""}
+        ${a.notiz?`<span>📝 ${esc(a.notiz)}</span>`:""}
+      </div>
+    </div>
+    <div class="auf-qty">${fmt(r.menge)}<small>${esc(a.einheit||"")}</small></div>
+    ${ro?"":`<div class="auf-acts"><button class="iconbtn" data-edit="${a.id}" title="Bearbeiten">✎</button></div>`}
+  </div>`;
+}
+function editAuf(id,pre){
+  const a=af().auf.find(x=>x.id===id);if(!a)return;
+  const isCorrection=aufSent();           // Bearbeitung eines gesendeten Aufmaßes = Korrektur
+  const vorTotal=entryTotal(a);
+  let sel=pre?pre.sel:a.lvId,isNt=pre?!!pre.isNt:false;
+  const name0=pre?pre.name:(a.bezeichnung||"");
+  const einheit0=pre?pre.einheit:(a.einheit||"");
+  const notiz0=pre?pre.notiz:(a.notiz||"");
+  let rooms=pre?pre.rooms:(a.rooms||[]).map(r=>({raum:r.raum||"",teil:r.teil||"",formel:(r.formel!=null?r.formel:""),menge:(r.menge!=null?r.menge:0)}));
+  if(!rooms.length)rooms=[{raum:"",teil:"",formel:"",menge:0}];
+  openModal(`<h2>Aufmaßzeile bearbeiten <button class="close" onclick="closeModal()">×</button></h2>
+    ${isCorrection?`<div class="lockbanner korr" style="margin-bottom:10px"><span><b>Korrektur an gesendetem Aufmaß.</b> Aufgemessen (fest): <b>${fmt(aufMenge(a))} ${esc(a.einheit||"")}</b>. Ändere unten die Menge und gib eine Begründung an – die Differenz wird festgehalten.</span></div>`:""}
+    <div class="grid2">
+      <label class="fld"><span>Eigener Kurztext</span><input class="ipt" id="eName" value="${esc(name0)}"></label>
+      <label class="fld"><span>Einheit</span><input class="ipt" id="eEinheit" list="ehList" value="${esc(einheit0)}"></label>
+    </div>
+    <label class="fld"><span>Zuordnung</span>
+      <div class="assign-row"><button class="btn ghost" id="eLvBtn"></button><button class="btn ghost" id="eNachtrag">＋ Nachtrag</button></div>
+      <div class="hint" id="eAssignHint"></div></label>
+    <div class="fld"><span class="fld-label">Räume &amp; Menge je Raum</span>
+      <div id="eRooms"></div>
+      <button class="btn sm" id="eAddRoom" style="margin-top:2px">＋ Raum</button>
+      <div class="eroom-total"><span>Gesamt</span><span class="q" id="eTotal">–</span></div>
+    </div>
+    <label class="fld"><span>Notiz</span><input class="ipt" id="eNotiz" value="${esc(notiz0)}"></label>
+    ${isCorrection?`<div class="fld"><span class="fld-label">Quelle der Korrektur</span>
+      <div class="seg" id="eQuelleSeg">
+        <button type="button" class="seg-btn" data-q="eigen">Eigene Korrektur</button>
+        <button type="button" class="seg-btn" data-q="fachplaner">Korrektur Fachplaner</button>
+      </div></div>
+    <label class="fld"><span>Grund / Kommentar ${a.korrektur?'(bisher: '+esc(a.korrektur.grund||'')+')':''}</span><input class="ipt" id="eGrund" placeholder="z. B. Prüfrechnung: nur 50 % ausgeführt" value="${esc(a.korrektur?a.korrektur.grund:'')}"></label>
+    <label class="chkline"><input type="checkbox" id="eOffen" ${a.korrektur&&a.korrektur.offen?"checked":""}> ⚠ Einspruch / strittig – Menge <b>nicht</b> ändern nötig; wird auffällig markiert und ins nächste Aufmaß mitgenommen</label>`:""}
+    <div class="btn-row"><button class="btn primary" id="eSave">Speichern</button><button class="btn danger" id="eDel">Löschen</button></div>`);
+  const setBtn=()=>{
+    const b=el("eLvBtn"),nt=el("eNachtrag"),hint=el("eAssignHint");
+    nt.classList.toggle("nachtrag-on",isNt);b.classList.remove("chosen");
+    const r=sel?LV().find(x=>x.id===sel):null;
+    if(r){b.classList.add("chosen");b.innerHTML=`↳ ${esc(r.oz||"")} ${esc(r.kurztext||"")} <span style="margin-left:auto;color:var(--bad)">✕</span>`;hint.textContent="Zugeordnet. Tippen zum Aufheben.";}
+    else if(isNt){b.textContent="LV-Position zuordnen …";hint.innerHTML="Wird als <b>Nachtragsposition</b> ins LV aufgenommen.";}
+    else{b.textContent="LV-Position zuordnen …";hint.textContent="Ohne Zuordnung bleibt die Zeile „nicht zugeordnet“.";}
+  };
+  const updTotal=()=>{el("eTotal").textContent=fmt(rooms.reduce((s,r)=>s+(r.menge||0),0))+" "+el("eEinheit").value.trim();};
+  const roomOptions=(cur)=>{
+    const set=new Set(getRooms());
+    (af().auf||[]).forEach(x=>(x.rooms||[]).forEach(rr=>{if(rr.raum)set.add(rr.raum);}));
+    rooms.forEach(rr=>{if(rr.raum)set.add(rr.raum);});if(cur)set.add(cur);
+    const list=[...set].sort((a,b)=>a.localeCompare(b,"de"));
+    return `<option value="">— Raum wählen —</option>`
+      +list.map(rm=>`<option value="${esc(rm)}" ${rm===cur?"selected":""}>${esc(rm)}</option>`).join("")
+      +`<option value="__new__">➕ neuer Raum …</option>`;
+  };
+  const renderRooms=()=>{
+    const eh=el("eEinheit")?el("eEinheit").value.trim():(a.einheit||"");
+    const vorHead=isCorrection?`<div class="eroom-head"><span class="rc">Raum</span><span class="vc">vorher</span><span class="nc">nachher (${esc(eh)})</span></div>`:"";
+    el("eRooms").innerHTML=vorHead+rooms.map((r,i)=>{
+      const vor=isCorrection?aufRoomMenge(a,r.raum,r.teil):null;
+      return `<div class="eroom ${isCorrection?'korr':''}">
+      <select class="ipt eroom-raum" data-i="${i}">${roomOptions(r.raum)}</select>
+      ${isCorrection?`<span class="eroom-vor" title="Aufgemessen – fest">${vor!=null?fmt(vor):"–"}</span>`:""}
+      <input class="ipt num eroom-formel" data-i="${i}" inputmode="decimal" value="${esc(r.formel||(r.menge?fmt(r.menge):''))}" placeholder="Menge/Formel">
+      <span class="eroom-res" data-i="${i}">${r.menge?("= "+fmt(r.menge)):""}</span>
+      <button type="button" class="iconbtn del eroom-del" data-i="${i}" title="Raum entfernen">🗑</button>
+      <input class="ipt eroom-teil" data-i="${i}" list="teilList" value="${esc(r.teil||'')}" placeholder="Teilbereich (optional)" style="flex:1 0 100%;margin-top:2px">
+    </div>`;}).join("");
+    el("eRooms").querySelectorAll(".eroom-teil").forEach(inp=>inp.oninput=()=>{rooms[+inp.dataset.i].teil=inp.value.trim();});
+    el("eRooms").querySelectorAll(".eroom-raum").forEach(sel2=>sel2.onchange=()=>{
+      const i=+sel2.dataset.i;
+      if(sel2.value==="__new__"){
+        const nn=(prompt("Neuer Raum:")||"").trim();
+        if(nn){addRoom(nn);rooms[i].raum=nn;}
+        renderRooms();updTotal();return;
+      }
+      rooms[i].raum=sel2.value;
+    });
+    el("eRooms").querySelectorAll(".eroom-formel").forEach(inp=>inp.oninput=()=>{
+      const i=+inp.dataset.i,v=evalFormel(inp.value);
+      rooms[i].formel=inp.value.trim();
+      rooms[i].menge=(v==null||isNaN(v))?0:v;
+      el("eRooms").querySelector(`.eroom-res[data-i="${i}"]`).textContent=(v!=null&&isNaN(v))?"Fehler":(v?("= "+fmt(v)):"");
+      updTotal();
+    });
+    el("eRooms").querySelectorAll(".eroom-del").forEach(b=>b.onclick=()=>{rooms.splice(+b.dataset.i,1);if(!rooms.length)rooms=[{raum:"",teil:"",formel:"",menge:0}];renderRooms();updTotal();});
+    updTotal();
+  };
+  setBtn();renderRooms();
+  el("eEinheit").addEventListener("input",updTotal);
+  let korrQuelle=(a.korrektur&&a.korrektur.quelle)||"eigen";
+  const paintQuelle=()=>{const seg=el("eQuelleSeg");if(!seg)return;seg.querySelectorAll(".seg-btn").forEach(bt=>bt.classList.toggle("on",bt.dataset.q===korrQuelle));};
+  if(el("eQuelleSeg")){el("eQuelleSeg").querySelectorAll(".seg-btn").forEach(bt=>bt.onclick=()=>{korrQuelle=bt.dataset.q;paintQuelle();});paintQuelle();}
+  el("eLvBtn").onclick=()=>{
+    if(sel){sel=null;setBtn();return;}
+    const pre={sel:sel,isNt:isNt,rooms:rooms,name:el("eName").value,einheit:el("eEinheit").value,notiz:el("eNotiz").value};
+    openLvPicker(id2=>{
+      if(id2){pre.sel=id2;pre.isNt=false;const u=lvUnit(id2);if(u)pre.einheit=u;}
+      editAuf(id,pre);
+    });
+  };
+  el("eNachtrag").onclick=()=>{ isNt=!isNt; if(isNt)sel=null; setBtn(); };
+  el("eAddRoom").onclick=()=>{rooms.push({raum:"",teil:"",formel:"",menge:0});renderRooms();
+    const ins=el("eRooms").querySelectorAll(".eroom-raum");if(ins.length)ins[ins.length-1].focus();};
+  el("eSave").onclick=()=>{
+    // ungültige Formeln prüfen
+    for(const r of rooms){const v=evalFormel(r.formel);if(v!=null&&isNaN(v)){toast("Formel ungültig bei Raum „"+(r.raum||"?")+"“");return;}}
+    const name=el("eName").value.trim();
+    let grund="";
+    if(isCorrection){
+      grund=(el("eGrund").value||"").trim();
+      if(!grund){toast("Bitte eine Begründung für die Korrektur angeben");return;}
+    }
+    let lvId=sel;
+    if(!lvId&&isNt){ if(!name){toast("Für einen Nachtrag bitte einen Kurztext schreiben");return;} lvId=createNachtrag(name,el("eEinheit").value.trim()); }
+    const uLv=lvUnit(lvId);
+    a.bezeichnung=name;a.einheit=uLv||el("eEinheit").value.trim();a.notiz=el("eNotiz").value.trim();a.lvId=lvId;
+    a.rooms=rooms.map(r=>({raum:r.raum.trim(),teil:(r.teil||"").trim(),formel:r.formel,menge:r.menge||0}));
+    if(isCorrection){a.korrektur={grund:grund,datum:todayStr(),vorher:aufMenge(a),offen:(el("eOffen")?el("eOffen").checked:false),quelle:korrQuelle};}
+    // bereits vorhandene Position? -> zusammenführen statt Duplikat
+    let merged=false;
+    if(lvId){const tgt=assignLvDedup(a.id,lvId);merged=(tgt&&tgt!==a.id);}
+    saveDB();closeModal();renderAuf();renderStats();renderLV();refreshDatalists();
+    toast(merged?"Position war schon erfasst – zusammengeführt":(isCorrection?"Korrektur gespeichert":"Gespeichert"));
+  };
+  el("eDel").onclick=()=>{closeModal();deleteAufLine(id);};
+}
+function promoteAuf(id){
+  const a=af().auf.find(x=>x.id===id);if(!a)return;
+  const firstRoom=(a.rooms&&a.rooms[0]&&a.rooms[0].raum)||"";
+  const newId=createNachtrag(a.bezeichnung||firstRoom,a.einheit);
+  a.lvId=newId;saveDB();renderAuf();renderLV();renderStats();toast("Als Nachtrag übernommen");
+}
+
+/* LV picker (used in form, edit, assign) */
+function openMultiLvPicker(){
+  const p=bau();
+  if(!lvAll(p).length){toast("Kein LV vorhanden – bitte erst importieren oder Positionen anlegen");return;}
+  const existing=new Set(af().auf.filter(e=>e.lvId).map(e=>e.lvId));
+  const sel=new Map(); // id -> {formel, menge}
+  const roomOpts=()=>{
+    return `<option value="">— ohne Raum —</option>`
+      +getRooms(p).map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join("")
+      +`<option value="__new__">➕ neuer Raum …</option>`;
+  };
+  openModal(`<h2>Mehrere LV-Positionen übernehmen <button class="close" onclick="closeModal()">×</button></h2>
+    <label class="fld"><span>Raum (gilt für alle, optional)</span>
+      <select class="ipt" id="mlRoom">${roomOpts()}</select></label>
+    <div class="picker-search" style="display:flex;gap:8px;align-items:center"><input class="ipt" id="mlSearch" placeholder="Suchen (OZ, Text) …" autocomplete="off" style="flex:1"><button class="btn sm" id="mlTextToggle">${pkTextMode==="kurz"?"📄 Langtext":"📄 Kurztext"}</button></div>
+    <div class="hint" style="margin:2px 0 8px">Ankreuzen und Menge je Position eintragen (Einheit kommt aus dem LV). Der Raum gilt für alle – später je Raum erweiterbar.</div>
+    <div id="mlList" style="max-height:44vh;overflow:auto;border:1px solid var(--line-soft);border-radius:10px"></div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn primary" id="mlAdd">Auswahl hinzufügen</button>
+      <button class="btn" id="mlAll">Alle offenen wählen</button>
+    </div>`);
+  el("mlRoom").onchange=()=>{
+    if(el("mlRoom").value==="__new__"){
+      const nn=(prompt("Neuer Raum:")||"").trim();
+      if(nn){addRoom(nn);el("mlRoom").innerHTML=roomOpts();el("mlRoom").value=nn;}
+      else el("mlRoom").value="";
+    }
+  };
+  const render=()=>{
+    const q=(el("mlSearch").value||"").toLowerCase().trim();
+    let rows=lvAll(p);
+    if(q)rows=rows.filter(r=>((r.oz||"")+" "+(r.kurztext||"")+" "+(r.langtext||"")).toLowerCase().includes(q));
+    let lastGm=null;
+    el("mlList").innerHTML=rows.length?rows.map(r=>{
+      const has=existing.has(r.id),checked=sel.has(r.id);
+      const mengeVal=checked?(sel.get(r.id).formel||""):"";
+      let head="";const g=r.gruppe||"";
+      if(g!==lastGm){if(g){const col=titelColor(g);head=`<div class="pk-titel"${col?` style="background:${col};color:${textOn(col)}"`:""}>${esc(g)}</div>`;}lastGm=g;}
+      return head+`<div class="mlrow ${has?'has':''}">
+        <input type="checkbox" data-id="${r.id}" ${checked?'checked':''} ${has?'disabled':''}>
+        <span class="oz">${esc(r.oz||"")}</span>
+        <span class="kt">${esc(r.kurztext||"—")}${(pkTextMode==="lang"&&r.langtext)?`<span class="pl">${esc(r.langtext)}</span>`:""}</span>
+        <input class="ipt num mlqty" data-id="${r.id}" inputmode="decimal" value="${esc(mengeVal)}" placeholder="Menge" style="width:78px;flex:none" ${has?'disabled':''}>
+        <span class="eh">${esc(r.einheit||"")}</span>${has?'<span class="badge b-ok">im Aufmaß</span>':''}</div>`;
+    }).join(""):`<div class="empty" style="padding:18px"><p>Keine Position gefunden.</p></div>`;
+    el("mlList").querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{
+      const id=cb.dataset.id;
+      if(cb.checked){if(!sel.has(id))sel.set(id,{formel:"1",menge:1});const qi=el("mlList").querySelector(`.mlqty[data-id="${id}"]`);if(qi&&!qi.value)qi.value="1";}
+      else sel.delete(id);
+    });
+    el("mlList").querySelectorAll('.mlqty').forEach(inp=>inp.oninput=()=>{
+      const id=inp.dataset.id,v=evalFormel(inp.value);
+      sel.set(id,{formel:inp.value.trim(),menge:(v==null||isNaN(v))?0:v});
+      const cb=el("mlList").querySelector(`input[type=checkbox][data-id="${id}"]`);if(cb&&!cb.checked)cb.checked=true;
+    });
+  };
+  el("mlSearch").addEventListener("input",render);
+  el("mlTextToggle").onclick=()=>{pkTextMode=(pkTextMode==="kurz")?"lang":"kurz";el("mlTextToggle").textContent=(pkTextMode==="kurz")?"📄 Langtext":"📄 Kurztext";render();};
+  el("mlAll").onclick=()=>{lvAll(p).forEach(r=>{if(!existing.has(r.id)&&!sel.has(r.id))sel.set(r.id,{formel:"1",menge:1});});render();};
+  el("mlAdd").onclick=()=>{
+    if(!sel.size){toast("Nichts ausgewählt");return;}
+    const room=el("mlRoom").value==="__new__"?"":el("mlRoom").value;
+    let n=0;
+    lvAll(p).forEach(r=>{ if(sel.has(r.id)&&!existing.has(r.id)){
+      const {formel,menge}=sel.get(r.id);
+      af().auf.push({id:uid(),bezeichnung:r.kurztext||"",einheit:r.einheit||"",lvId:r.id,notiz:"",createdAt:Date.now(),
+        rooms:[{raum:room,formel:formel||"",menge:menge||0}]});
+      n++;
+    }});
+    saveDB();closeModal();renderAuf();renderStats();renderLV();refreshDatalists();
+    toast(n+" Position(en) ins Aufmaß übernommen");
+  };
+  render();
+}
+function openLvPicker(cb){
+  const p=bau();
+  openModal(`<h2>LV-Position wählen <button class="close" onclick="closeModal()">×</button></h2>
+    <div class="picker-search" style="display:flex;gap:8px;align-items:center"><input class="ipt" id="pkSearch" placeholder="Suchen (OZ, Text) …" autocomplete="off" style="flex:1"><button class="btn sm" id="pkTextToggle">${pkTextMode==="kurz"?"📄 Langtext":"📄 Kurztext"}</button></div>
+    <button class="pick" data-pick="" style="border-style:dashed"><span class="pn" style="color:var(--accent-deep)">＋ Neue LV-Position anlegen</span></button>
+    <div id="pkList"></div>`);
+  const render=()=>{
+    const q=(el("pkSearch").value||"").toLowerCase().trim();
+    let rows=lvAll(p);
+    if(q)rows=rows.filter(r=>((r.oz||"")+" "+(r.kurztext||"")+" "+(r.langtext||"")).toLowerCase().includes(q));
+    let lastG=null;
+    el("pkList").innerHTML=rows.length?rows.map(r=>{
+      let head="";const g=r.gruppe||"";
+      if(g!==lastG){if(g){const col=titelColor(g);head=`<div class="pk-titel"${col?` style="background:${col};color:${textOn(col)}"`:""}>${esc(g)}</div>`;}lastG=g;}
+      return head+`<button class="pick" data-pick="${r.id}">
+      <span class="pz">${esc(r.oz||"")}</span><span class="pn">${esc(r.kurztext||"—")}${r.source==="nachtrag"?' <span class="badge b-warn">Nachtrag</span>':''}${r.ozOffiziell?` <span class="badge b-ok">offiz. ${esc(r.ozOffiziell)}</span>`:''}${(pkTextMode==="lang"&&r.langtext)?`<span class="pl">${esc(r.langtext)}</span>`:""}</span><span class="pe">${esc(r.einheit||"")}</span></button>`;
+    }).join("")
+      :`<div class="empty"><p>Keine Position gefunden.</p></div>`;
+    el("pkList").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{closeModal();cb(b.dataset.pick);});
+  };
+  el("pkSearch").addEventListener("input",render);
+  el("pkTextToggle").onclick=()=>{pkTextMode=(pkTextMode==="kurz")?"lang":"kurz";el("pkTextToggle").textContent=(pkTextMode==="kurz")?"📄 Langtext":"📄 Kurztext";render();};
+  el("modal").querySelector('[data-pick=""]').onclick=()=>{
+    closeModal();
+    // create new LV position inline
+    const r={oz:"",kurztext:el("pkSearch")?el("pkSearch").value.trim():"",langtext:"",einheit:"",mengeLv:null};
+    openModal(`<h2>Neue LV-Position <button class="close" onclick="closeModal()">×</button></h2>${lvFormHTML(r)}
+      <button class="btn primary block" id="pkCreate" style="margin-top:6px">Anlegen & zuordnen</button>`);
+    el("pkCreate").onclick=()=>{
+      const id=uid();
+      bau().lv.push({id,oz:el("lvOZ").value.trim(),kurztext:el("lvKT").value.trim(),langtext:el("lvLT").value.trim(),
+        einheit:el("lvEH").value.trim(),mengeLv:parseDE(el("lvMenge").value),ep:(el("lvEP")?parseMoney(el("lvEP").value):null),source:"manuell"});
+      saveDB();closeModal();cb(id);toast("Position angelegt");
+    };
+  };
+  render();
+}
+
+function refreshDatalists(){
+  const set=new Set(getRooms());
+  const teils=new Set();
+  af().auf.forEach(a=>(a.rooms||[]).forEach(r=>{if(r.raum)set.add(r.raum);if(r.teil)teils.add(r.teil);}));
+  el("bereichList").innerHTML=[...set].sort((a,b)=>a.localeCompare(b,"de")).map(b=>`<option value="${esc(b)}">`).join("");
+  const tl=el("teilList");if(tl)tl.innerHTML=[...teils].sort((a,b)=>a.localeCompare(b,"de")).map(b=>`<option value="${esc(b)}">`).join("");
+}
+
+/* ======================= SUCHE view ======================= */
+el("globalSearch").addEventListener("input",renderSearch);
+function renderSearch(){
+  const q=(el("globalSearch").value||"").toLowerCase().trim();
+  const box=el("searchResults");
+  if(!q){box.innerHTML=`<div class="card"><div class="empty"><div class="big">🔍</div><p>Suchbegriff eingeben.</p>
+    <p class="hint">z. B. ein Artikel, um zu sehen in welchen Bereichen er aufgemessen wurde.</p></div></div>`;return;}
+  // matching aufmaß lines (aktives Aufmaß)
+  const hits=af().auf.filter(a=>((a.rooms||[]).map(r=>r.raum).join(" ")+" "+(a.bezeichnung||"")+" "+(a.notiz||"")+" "+(lvLabel(a.lvId)||"")).toLowerCase().includes(q));
+  // matching LV positions
+  const lvHits=LV().filter(r=>((r.oz||"")+" "+(r.kurztext||"")+" "+(r.langtext||"")).toLowerCase().includes(q));
+
+  let html="";
+  if(hits.length){
+    // Summe je Raum über alle Treffer
+    const bereiche={};
+    hits.forEach(a=>(a.rooms||[]).forEach(r=>{const k=r.raum||"(ohne Raum)";bereiche[k]=(bereiche[k]||0)+(r.menge||0);}));
+    html+=`<div class="card"><h2>${hits.length} Aufmaßzeile(n)</h2>
+      <div class="sub">Aufgemessen in: ${Object.keys(bereiche).map(b=>`<span class="badge b-info" style="margin:2px">${esc(b)}: ${fmt(bereiche[b])}</span>`).join(" ")}</div>
+      ${hits.map(a=>{const lvl=lvLabel(a.lvId);return `<div class="auf-row ${a.lvId?'':'unassigned'}">
+        <div class="auf-main"><div class="name">${esc(a.bezeichnung||"—")}</div>
+          <div class="meta">${lvl?`<span class="lvref">↳ ${esc(lvl)}</span>`:'<span class="badge b-warn">nicht zugeordnet</span>'}${a.notiz?` <span>📝 ${esc(a.notiz)}</span>`:""}</div>
+          ${roomsChips(a)}</div>
+        <div class="auf-qty">${fmt(entryTotal(a))}<small>${esc(a.einheit||"")}</small></div></div>`;}).join("")}
+    </div>`;
+  }
+  if(lvHits.length){
+    html+=`<div class="card"><h2>${lvHits.length} LV-Position(en)</h2>
+      <div class="tablewrap"><table class="lv"><thead><tr><th>OZ</th><th>Kurztext</th><th class="r">EH</th><th class="r">Menge LV</th><th class="r">Aufmaß</th></tr></thead><tbody>
+      ${lvHits.map(r=>`<tr><td class="oz">${esc(r.oz||"")}</td><td class="kt">${esc(r.kurztext||"—")}</td><td class="r">${esc(r.einheit||"")}</td><td class="r num">${posMengeLv(r)!=null?fmt(posMengeLv(r)):"–"}</td><td class="r num">${mengeAuf(r.id)>0?fmt(mengeAuf(r.id)):"–"}</td></tr>`).join("")}
+      </tbody></table></div></div>`;
+  }
+  if(!hits.length&&!lvHits.length)html=`<div class="card"><div class="empty"><p>Keine Treffer für „${esc(q)}“.</p></div></div>`;
+  box.innerHTML=html;
+}
+
+/* ======================= Backup ======================= */
+const SYNC_FILENAME="aufmass-sync.json";
+function syncCaps(){
+  const https=(location.protocol==="https:");
+  const canPick=!!window.showSaveFilePicker;
+  let canShareFiles=false;
+  try{canShareFiles=!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File(["{}"],SYNC_FILENAME,{type:"application/json"})]}));}catch(e){canShareFiles=false;}
+  return {https,canPick,canShareFiles};
+}
+function renderSyncDiag(){
+  const el2=el("syncDiag");if(!el2)return;
+  if(typeof location==="undefined")return;
+  const c=syncCaps();
+  let method,advice;
+  if(c.canPick){method="Speichern-Dialog (Ort frei wählbar – auch iCloud Drive)";advice="";}
+  else if(c.canShareFiles){method="Teilen-Menü (In Dateien sichern / iCloud, AirDrop)";advice="";}
+  else{method="Download in den Ordner „Downloads“";advice=c.https?" · Tipp iPad: Einstellungen → Safari → Downloads → „iCloud Drive“ wählen, dann landet die Datei direkt in iCloud. Mac: Datei aus „Downloads“ in iCloud Drive ziehen.":" · Hinweis: Die App ist nicht über eine https-Adresse geöffnet – dann bietet Safari kein „In Dateien sichern“. Öffne sie über deine GitHub-Pages-Adresse (https).";}
+  el2.innerHTML=`ℹ️ Speichern auf diesem Gerät: <b>${method}</b>. Adresse: ${c.https?"https ✓":esc(location.protocol)+" ✗"}${advice}`;
+}
+async function shareBackup(){
+  const json=JSON.stringify(DB,null,2);
+  const isTouch=(navigator.maxTouchPoints||0)>0; // iPad/iPhone = Touch; Mac = kein Touch
+  // 1) Desktop mit echtem Speichern-Dialog (z. B. Chrome/Edge, auch am Mac): Ort frei wählbar (iCloud Drive)
+  if(window.showSaveFilePicker){
+    try{
+      const handle=await window.showSaveFilePicker({suggestedName:SYNC_FILENAME,types:[{description:"Aufmaß-Daten",accept:{"application/json":[".json"]}}]});
+      const w=await handle.createWritable();await w.write(json);await w.close();
+      toast("Gespeichert");return;
+    }catch(e){if(e&&e.name==="AbortError")return;}
+  }
+  // 2) Nur auf Touch-Geräten (iPad/iPhone): natives Teilen-Menü → „In Dateien sichern“ (iCloud) / AirDrop
+  if(isTouch){
+    let file=null;try{file=new File([json],SYNC_FILENAME,{type:"application/json"});}catch(e){file=null;}
+    if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:"Aufmaß-Daten"});return;}
+      catch(e){if(e&&e.name==="AbortError")return;}
+    }
+  }
+  // 3) Mac Safari & Rest: direkter Datei-Download (in „Downloads“ – von dort nach iCloud Drive verschiebbar)
+  const blob=new Blob([json],{type:"application/json"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download=SYNC_FILENAME;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  toast("Als „"+SYNC_FILENAME+"“ in „Downloads“ gespeichert – von dort in iCloud Drive verschiebbar");
+}
+el("btnShareBackup").onclick=shareBackup;
+el("btnBackupNow").onclick=()=>{makeBackup("manuell").then(()=>toast("Sicherung angelegt"));};
+el("btnBackupList").onclick=()=>{
+  listBackups().then(list=>{
+    const body=list.length?list.map(b=>{
+      const d=new Date(b.ts);
+      const when=d.toLocaleDateString("de-DE")+" "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+      return `<div class="listrow"><div class="info"><b>${when}</b><div class="x">${esc(b.reason||"Sicherung")}</div></div><button class="btn sm" data-restore="${b.ts}">Wiederherstellen</button></div>`;
+    }).join(""):'<div class="empty"><p>Noch keine Sicherungen vorhanden.</p></div>';
+    openModal(`<h2>Notfall-Sicherungen <button class="close" onclick="closeModal()">×</button></h2><div class="sub" style="margin-bottom:10px">Wähle einen Stand zum Wiederherstellen. Der aktuelle Stand wird dabei ersetzt (vorher wird automatisch eine Sicherung angelegt).</div>${body}`);
+    el("modal").querySelectorAll("[data-restore]").forEach(btn=>btn.onclick=()=>{
+      const ts=+btn.dataset.restore;
+      if(confirm("Diesen Stand wiederherstellen? Der aktuelle Stand wird ersetzt."))
+        makeBackup("vor Wiederherstellen").then(()=>restoreBackup(ts));
+    });
+  });
+};
+renderSyncDiag();
+el("btnExportAll").onclick=()=>{
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download="aufmass-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  toast("Backup exportiert");
+};
+el("btnImportAll").onclick=()=>el("backupInput").click();
+el("backupInput").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const d=JSON.parse(rd.result);
+      const ok=(d.bauten&&d.bauten.length)||(d.projects&&d.projects.length);
+      if(!ok)throw 0;
+      if(confirm("Backup einlesen? Aktuelle Daten werden ersetzt.")){
+        // gleiche Migration wie beim Laden
+        if(d.bauten&&d.bauten.length){DB=normalize(d);}
+        else{
+          const bauten=d.projects.map(p=>{
+            const a={id:uid(),name:"Aufmaß 1",createdAt:p.createdAt||Date.now(),auf:p.auf||[]};
+            return {id:p.id||uid(),name:p.name||"Bau",createdAt:p.createdAt||Date.now(),
+              lv:p.lv||[],raeume:p.raeume||[],aufmasse:[a],activeAufId:a.id};
+          });
+          DB=normalize({version:2,bauten,templates:d.templates||[],activeBauId:bauten[0].id});
+        }
+        saveDB();renderAll();toast("Backup eingelesen");
+      }
+    }catch(err){toast("Ungültige Backup-Datei");}
+    e.target.value="";
+  };
+  rd.readAsText(f,"utf-8");
+});
+
+/* ======================= EXPORT ======================= */
+let expGroup="pos", expDetails=false, expOpen=false, expAllAuf=false;
+el("expPills").querySelectorAll(".pill").forEach(b=>b.onclick=()=>{
+  el("expPills").querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");expGroup=b.dataset.g;renderExport();
+});
+el("expOpts").querySelectorAll(".pill").forEach(b=>b.onclick=()=>{
+  b.classList.toggle("on");
+  if(b.dataset.o==="details")expDetails=b.classList.contains("on");
+  if(b.dataset.o==="offen")expOpen=b.classList.contains("on");
+  if(b.dataset.o==="alleauf")expAllAuf=b.classList.contains("on");
+  renderExport();
+});
+/* Welche Aufmaße fließen in den Export? (aktives oder alle des Baus) */
+function exportAufList(){
+  const b=bau();
+  return expAllAuf?b.aufmasse.map(a=>({name:a.name,entries:a.auf||[]})):[{name:af().name,entries:af().auf}];
+}
+function exportEntries(){const out=[];exportAufList().forEach(g=>(g.entries||[]).forEach(e=>out.push(e)));return out;}
+function mengeAufExp(lvId){return exportEntries().filter(e=>e.lvId===lvId).reduce((s,e)=>s+entryTotal(e),0);}
+
+function bereichSummary(entries){
+  // Raum -> {sum, lines[]}, aufgefächert über die Raum-Mengen jeder Zeile
+  const m={};
+  entries.forEach(a=>(a.rooms||[]).forEach(r=>{
+    const k=r.raum||"(ohne Raum)";
+    (m[k]=m[k]||{sum:0,lines:[]});
+    m[k].sum+=(r.menge||0);
+    m[k].lines.push({bezeichnung:a.bezeichnung,formel:r.formel,menge:r.menge,notiz:a.notiz,einheit:a.einheit});
+  }));
+  return m;
+}
+function cmpClass(diff,lv){if(lv==null)return"info";return Math.abs(diff)<=Math.max(Math.abs(lv)*0.001,1e-6)?"ok":(diff>0?"warn":"info");}
+function renderExport(){
+  const list=exportAufList();
+  const scopeName=expAllAuf?(bau().name+" – alle Aufmaße ("+list.length+")"):(bau().name+" – "+af().name);
+  const p={lv:LV(),auf:exportEntries(),name:scopeName};
+  const today=new Date().toLocaleDateString("de-DE");
+  let body="";
+  if(expGroup==="pos"){
+    const positions=p.lv.filter(pos=>expOpen?true:mengeAufExp(pos.id)>0);
+    if(!positions.length&&!p.auf.some(a=>!a.lvId)){
+      body=`<div class="empty"><p>Noch nichts aufgemessen.</p></div>`;
+    }else{
+      let lastGrpR="";
+      positions.forEach(pos=>{
+        const grp=pos.gruppe||"";
+        if(grp&&grp!==lastGrpR){const col=titelColor(grp);body+=`<div class="rep-titel"${col?` style="background:${col};color:${textOn(col)};border-left:8px solid rgba(0,0,0,.25)"`:""}>${esc(grp)}</div>`;lastGrpR=grp;}
+        const entries=p.auf.filter(a=>a.lvId===pos.id);
+        const sum=entries.reduce((s,a)=>s+entryTotal(a),0);
+        const eh=pos.einheit||(entries[0]&&entries[0].einheit)||"";
+        const bm=bereichSummary(entries);
+        let lines="";
+        Object.keys(bm).sort((a,b)=>a.localeCompare(b,"de")).forEach(k=>{
+          lines+=`<div class="rep-line"><span class="where">${esc(k)}</span><span class="q">${fmt(bm[k].sum)} ${esc(eh)}</span></div>`;
+          if(expDetails)bm[k].lines.forEach(a=>{lines+=`<div class="rep-sub"><span>${esc(a.bezeichnung||"—")}${a.formel?" ("+esc(a.formel)+")":""}${a.notiz?" · "+esc(a.notiz):""}</span><span class="q">${fmt(a.menge)}</span></div>`;});
+        });
+        if(!entries.length)lines=`<div class="rep-line"><span class="where" style="color:var(--ink-faint)">— kein Aufmaß —</span><span class="q"></span></div>`;
+        let korr="";
+        entries.filter(e=>e.korrektur).forEach(e=>{const k=e.korrektur;korr+=`<div class="rep-korr">⚠ ${k.datum?esc(k.datum)+": ":""}${k.vorher!=null?"vorher "+fmt(k.vorher)+" "+esc(eh)+" → "+fmt(entryTotal(e))+" "+esc(eh)+" · ":""}${esc(k.grund||"")}</div>`;});
+        let cmp="";
+        {const mlv=posMengeLv(pos);if(mlv!=null&&entries.length){const d=sum-mlv;cmp=`<span class="cmp ${cmpClass(d,mlv)}">LV ${fmt(mlv)} · Δ ${(d>0?"+":"")}${fmt(d)}</span>`;}}
+        body+=`<div class="rep-pos">
+          <div class="ph"><span class="pt"><span class="poz">${esc(pos.ozOffiziell||pos.oz||"")}</span>${esc(pos.bezOffiziell||pos.kurztext||"—")}${pos.source==="nachtrag"?' <span class="badge b-warn">Nachtrag</span>':''}</span></div>
+          ${lines}
+          ${korr}
+          ${entries.length?`<div class="rep-total"><span>Summe${eh?" ("+esc(eh)+")":""}</span><span><span class="q">${fmt(sum)} ${esc(eh)}</span>${cmp}</span></div>`:""}
+        </div>`;
+      });
+      // unassigned
+      const un=p.auf.filter(a=>!a.lvId);
+      if(un.length){
+        const bm=bereichSummary(un);let lines="";
+        Object.keys(bm).sort((a,b)=>a.localeCompare(b,"de")).forEach(k=>{
+          bm[k].lines.forEach(a=>{lines+=`<div class="rep-line"><span class="where">${esc(k)} · ${esc(a.bezeichnung||"—")}</span><span class="q">${fmt(a.menge)} ${esc(a.einheit||"")}</span></div>`;});
+        });
+        body+=`<div class="rep-pos" style="border-color:var(--warn)"><div class="ph"><span class="pt">Nicht zugeordnete Aufmaßzeilen</span></div>${lines}</div>`;
+      }
+    }
+  }else{
+    // group by Raum (über die Raum-Mengen jeder Zeile)
+    const m={};
+    p.auf.forEach(a=>(a.rooms||[]).forEach(r=>{const k=r.raum||"(ohne Raum)";(m[k]=m[k]||[]).push({a,r});}));
+    const keys=Object.keys(m).sort((x,y)=>x.localeCompare(y,"de"));
+    if(!keys.length){body=`<div class="empty"><p>Noch nichts aufgemessen.</p></div>`;}
+    keys.forEach(k=>{
+      let lines="";
+      m[k].forEach(o=>{const a=o.a,r=o.r,lvl=lvLabel(a.lvId);
+        lines+=`<div class="rep-line"><span class="where">${esc(a.bezeichnung||"—")} ${lvl?`<span style="font-family:var(--mono);font-size:12px;color:var(--info)">↳ ${esc(lvl)}</span>`:'<span class="badge b-warn">offen</span>'}${expDetails&&r.formel?` <span style="color:var(--ink-faint)">(${esc(r.formel)})</span>`:""}</span><span class="q">${fmt(r.menge)} ${esc(a.einheit||"")}</span></div>`;});
+      body+=`<div class="rep-pos"><div class="ph"><span class="pt">${esc(k)} <span class="cnt" style="font-weight:600;color:var(--ink-faint);font-size:12.5px">${m[k].length}</span></span></div>${lines}</div>`;
+    });
+  }
+  const anyEP=LV().some(pp=>pp.ep!=null);
+  if(anyEP){
+    let tAuf=0,tLV=0;
+    LV().forEach(pp=>{if(pp.ep!=null){tAuf+=mengeAufExp(pp.id)*pp.ep;{const ml=posMengeLv(pp);if(ml!=null)tLV+=ml*pp.ep;}}});
+    body+=`<div class="rep-pos" style="border:1.5px solid var(--ink);margin-top:10px">
+      <div class="rep-total" style="font-size:15px"><span>Rechnungssumme${expAllAuf?" (alle Aufmaße)":""} · netto</span><span class="q">${fmtEUR(tAuf)}</span></div>
+      <div class="rep-line" style="color:var(--ink-soft)"><span class="where">Auftragswert LV (Menge LV × EP) · netto</span><span class="q">${fmtEUR(tLV)}</span></div>
+    </div>`;
+  }
+  const ks=offeneKlaerungen();
+  const klaerHtml=ks.length?`<div class="rep-pos" style="border:1.5px solid var(--bad,#d23b3b);background:var(--bad-tint,#fff0f0)">
+    <div class="ph"><span class="pt" style="color:var(--bad,#c22)">⚠ Offene Klärungen (${ks.length}) – bis Schlussaufmaß zu erledigen</span></div>
+    ${ks.map(k=>{const lbl=k.pos?lvLabel(k.e.lvId):(k.e.bezeichnung||"—");const kk=k.e.korrektur,eh=esc(k.e.einheit||"");const vh=kk.vorher!=null?("vorher "+fmt(kk.vorher)+" "+eh+" → "+fmt(entryTotal(k.e))+" "+eh+" · "):"";return `<div class="rep-line"><span class="where">${esc(lbl)} <span style="color:var(--ink-faint)">(${esc(k.aufName)})</span></span><span class="q" style="color:var(--bad,#a22)">${vh}${esc(kk.grund||"")}</span></div>`;}).join("")}
+  </div>`:"";
+  const vb=vorbemAll();
+  let vbHtml="";
+  if(vb.length){
+    let lg="";let inner="";
+    vb.forEach(v=>{const g=v.gruppe||"";if(g&&g!==lg){inner+=`<div style="font-weight:700;margin:8px 0 3px">${esc(g)}</div>`;lg=g;}inner+=`<div style="margin-bottom:8px">${v.titel?`<b>${esc(v.titel)}</b><br>`:""}<span style="white-space:pre-line">${esc(v.text||"")}</span></div>`;});
+    vbHtml=`<details class="rep-pos" style="margin-bottom:10px"><summary style="font-weight:700;cursor:pointer">Vorbemerkungen (${vb.length}) – zum Auf-/Zuklappen tippen</summary><div style="margin-top:8px;font-size:12.5px;line-height:1.5">${inner}</div></details>`;
+  }
+  el("exportPreview").innerHTML=`<div class="rep">
+    <div class="rep-head"><h2>Aufmaß – ${esc(p.name||"")}</h2>
+    <div class="meta">${expGroup==="pos"?"Auswertung je LV-Position":"Auswertung je Bereich"} · Stand ${today} · ${p.auf.length} Aufmaßzeilen${expAllAuf?" · alle Aufmaße":""}</div></div>
+    ${vbHtml}${klaerHtml}${body}</div>`;
+}
+
+/* ---- Text für Zwischenablage ---- */
+function buildReportText(){
+  const p={lv:LV(),auf:exportEntries(),name:expAllAuf?(bau().name+" – alle Aufmaße"):(bau().name+" – "+af().name)};const L=[];
+  L.push("AUFMASS – "+(p.name||""));L.push("Stand "+new Date().toLocaleDateString("de-DE"));L.push("");
+  const ks=offeneKlaerungen();
+  if(ks.length){L.push("OFFENE KLÄRUNGEN ("+ks.length+") – bis Schlussaufmaß erledigen:");ks.forEach(k=>{const lbl=k.pos?lvLabel(k.e.lvId):(k.e.bezeichnung||"—");const kk=k.e.korrektur,eh=k.e.einheit||"";const vh=kk.vorher!=null?("vorher "+fmt(kk.vorher)+" "+eh+" -> "+fmt(entryTotal(k.e))+" "+eh+" · "):"";L.push("   ! "+lbl+" ("+k.aufName+"): "+vh+(kk.grund||""));});L.push("");}
+  if(expGroup==="pos"){
+    let lastGrpT="";
+    p.lv.filter(pos=>expOpen?true:mengeAufExp(pos.id)>0).forEach(pos=>{
+      const grp=pos.gruppe||"";
+      if(grp&&grp!==lastGrpT){L.push("=== "+grp+" ===");lastGrpT=grp;}
+      const entries=p.auf.filter(a=>a.lvId===pos.id);
+      const sum=entries.reduce((s,a)=>s+entryTotal(a),0);
+      const eh=pos.einheit||(entries[0]&&entries[0].einheit)||"";
+      L.push(((pos.ozOffiziell||pos.oz)?(pos.ozOffiziell||pos.oz)+"  ":"")+(pos.bezOffiziell||pos.kurztext||"—"));
+      const bm=bereichSummary(entries);
+      Object.keys(bm).sort((a,b)=>a.localeCompare(b,"de")).forEach(k=>L.push("   "+k+": "+fmt(bm[k].sum)+" "+eh));
+      if(entries.length){let t="   = "+fmt(sum)+" "+eh;{const mlv=posMengeLv(pos);if(mlv!=null)t+="   (LV "+fmt(mlv)+", Δ "+((sum-mlv)>0?"+":"")+fmt(sum-mlv)+")";}L.push(t);}
+      else L.push("   — kein Aufmaß —");
+      entries.filter(e=>e.korrektur).forEach(e=>{const k=e.korrektur;L.push("   ! geändert"+(k.datum?" "+k.datum:"")+": "+(k.vorher!=null?"vorher "+fmt(k.vorher)+" "+eh+" -> "+fmt(entryTotal(e))+" "+eh+" · ":"")+(k.grund||""));});
+      L.push("");
+    });
+    const un=p.auf.filter(a=>!a.lvId);
+    if(un.length){L.push("NICHT ZUGEORDNET:");un.forEach(a=>(a.rooms||[]).forEach(r=>L.push("   "+(r.raum||"")+" · "+(a.bezeichnung||"—")+": "+fmt(r.menge)+" "+(a.einheit||""))));}
+  }else{
+    const m={};p.auf.forEach(a=>(a.rooms||[]).forEach(r=>{const k=r.raum||"(ohne Raum)";(m[k]=m[k]||[]).push({a,r});}));
+    Object.keys(m).sort((a,b)=>a.localeCompare(b,"de")).forEach(k=>{
+      L.push(k+":");m[k].forEach(o=>{const lvl=lvLabel(o.a.lvId);L.push("   "+(o.a.bezeichnung||"—")+(lvl?" ["+lvl+"]":" [offen]")+": "+fmt(o.r.menge)+" "+(o.a.einheit||""));});L.push("");
+    });
+  }
+  const anyEP=LV().some(pp=>pp.ep!=null);
+  if(anyEP){
+    let tAuf=0,tLV=0;
+    LV().forEach(pp=>{if(pp.ep!=null){tAuf+=mengeAufExp(pp.id)*pp.ep;{const ml=posMengeLv(pp);if(ml!=null)tLV+=ml*pp.ep;}}});
+    L.push("");L.push("Rechnungssumme"+(expAllAuf?" (alle Aufmaße)":"")+" netto: "+fmtEUR(tAuf));
+    L.push("Auftragswert LV netto: "+fmtEUR(tLV));
+  }
+  return L.join("\n");
+}
+
+/* ---- gemeinsame Datenmatrizen (über die einbezogenen Aufmaße) ---- */
+function pivotMatrix(){
+  const b=bau();
+  const entries=exportEntries();
+  const used=new Set();entries.forEach(e=>(e.rooms||[]).forEach(r=>used.add(r.raum||"")));
+  const baurooms=getRooms(b).filter(rn=>used.has(rn));
+  const others=[...used].filter(rn=>!baurooms.includes(rn)).sort((x,y)=>x.localeCompare(y,"de"));
+  const roomCols=[...baurooms,...others];
+  const header=["OZ","Kurztext","Einheit",...roomCols.map(rn=>rn||"(ohne Raum)"),"Gesamt","Menge LV"];
+  const rows=[];
+  const cellSum=(list,rn)=>{let s=0;list.forEach(e=>(e.rooms||[]).forEach(r=>{if((r.raum||"")===rn)s+=(r.menge||0);}));return s||null;};
+  lvAll(b).forEach(pos=>{
+    const list=entries.filter(e=>e.lvId===pos.id);
+    if(list.length){
+      const eh=pos.einheit||list[0].einheit||"";
+      const total=list.reduce((s,e)=>s+entryTotal(e),0);
+      rows.push([pos.oz||"",pos.kurztext||"",eh,...roomCols.map(rn=>cellSum(list,rn)),total,posMengeLv(pos)]);
+    }else if(expOpen){
+      rows.push([pos.oz||"",pos.kurztext||"",pos.einheit||"",...roomCols.map(()=>null),null,posMengeLv(pos)]);
+    }
+  });
+  entries.filter(e=>!e.lvId).forEach(e=>rows.push(["(nicht zugeordnet)",e.bezeichnung||"",e.einheit||"",...roomCols.map(rn=>cellSum([e],rn)),entryTotal(e),null]));
+  return {header,rows};
+}
+function lvMatrix(){
+  const b=bau();
+  const header=["OZ","Kurztext","Einheit","Menge LV","Menge Aufmaß","Differenz","EP (€)","Betrag Aufmaß (€)","Betrag LV (€)","Typ"];
+  let tAuf=0,tLV=0,lastGrp="";
+  const rows=[];
+  lvAll(b).forEach(pos=>{
+    const grp=pos.gruppe||"";
+    if(grp&&grp!==lastGrp){rows.push([grp,"","","","","","","","",""]);lastGrp=grp;}
+    const auf=mengeAufExp(pos.id);
+    const mlv=posMengeLv(pos);const diff=(mlv!=null)?(auf-mlv):null;
+    const betragAuf=(pos.ep!=null)?auf*pos.ep:null;
+    const betragLV=(pos.ep!=null&&mlv!=null)?mlv*pos.ep:null;
+    if(betragAuf!=null)tAuf+=betragAuf;
+    if(betragLV!=null)tLV+=betragLV;
+    rows.push([pos.ozOffiziell||pos.oz||"",pos.bezOffiziell||pos.kurztext||"",pos.einheit||"",posMengeLv(pos),auf,diff,(pos.ep!=null?pos.ep:null),betragAuf,betragLV,(pos.source==="nachtrag"?"Nachtrag":pos.source==="manuell"?"manuell":"")]);
+  });
+  rows.push(["","SUMME","","","","","",tAuf,tLV,""]);
+  return {header,rows};
+}
+function detailMatrix(){
+  const b=bau();
+  const groups=exportAufList();
+  const multi=groups.length>1;
+  const base=["OZ","Kurztext","Einheit","Raum","Menge","Formel","Menge LV","Begründung (Korrektur)"];
+  const header=multi?["Aufmaß",...base]:base;
+  const rows=[];
+  const grund=e=>e.korrektur?((e.korrektur.datum?e.korrektur.datum+": ":"")+(e.korrektur.grund||"")):"";
+  groups.forEach(g=>{
+    lvAll(b).forEach(pos=>{(g.entries||[]).filter(e=>e.lvId===pos.id).forEach(e=>(e.rooms||[]).forEach(r=>{
+      const row=[pos.oz||"",pos.kurztext||"",e.einheit||pos.einheit||"",r.raum||"",(r.menge!=null?r.menge:null),r.formel||"",posMengeLv(pos),grund(e)];
+      rows.push(multi?[g.name,...row]:row);
+    }));});
+    (g.entries||[]).filter(e=>!e.lvId).forEach(e=>(e.rooms||[]).forEach(r=>{
+      const row=["(nicht zugeordnet)",e.bezeichnung||"",e.einheit||"",r.raum||"",(r.menge!=null?r.menge:null),r.formel||"",null,grund(e)];
+      rows.push(multi?[g.name,...row]:row);
+    }));
+  });
+  return {header,rows};
+}
+
+/* ---- Minimaler XLSX-Writer (offline, ohne Bibliothek) ---- */
+function xmlEsc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&apos;"}[c]));}
+function colLetter(n){let s="";n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26);}return s;}
+function sheetXML(rows){
+  let body="";
+  rows.forEach((row,ri)=>{
+    let cells="";
+    row.forEach((val,ci)=>{
+      if(val===null||val===undefined||val==="")return;
+      const ref=colLetter(ci)+(ri+1);
+      if(typeof val==="number"&&isFinite(val))cells+=`<c r="${ref}"><v>${val}</v></c>`;
+      else cells+=`<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xmlEsc(val)}</t></is></c>`;
+    });
+    body+=`<row r="${ri+1}">${cells}</row>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${body}</sheetData></worksheet>`;
+}
+function crc32(bytes){let c=~0>>>0;for(let i=0;i<bytes.length;i++){c^=bytes[i];for(let k=0;k<8;k++)c=(c>>>1)^(0xEDB88320&-(c&1));}return (~c)>>>0;}
+function buildXLSX(sheets){
+  sheets=sheets.map((s,i)=>({name:(s.name||("Blatt"+(i+1))).replace(/[\[\]:\*\?\/\\]/g,"-").slice(0,31),rows:s.rows}));
+  let ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>`;
+  sheets.forEach((s,i)=>ct+=`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`);
+  ct+=`</Types>`;
+  const relsRoot=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+  let wbSheets="",wbRels="";
+  sheets.forEach((s,i)=>{wbSheets+=`<sheet name="${xmlEsc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`;wbRels+=`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`;});
+  const workbook=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${wbSheets}</sheets></workbook>`;
+  const workbookRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${wbRels}</Relationships>`;
+  const files=[{name:"[Content_Types].xml",data:ct},{name:"_rels/.rels",data:relsRoot},{name:"xl/workbook.xml",data:workbook},{name:"xl/_rels/workbook.xml.rels",data:workbookRels}];
+  sheets.forEach((s,i)=>files.push({name:`xl/worksheets/sheet${i+1}.xml`,data:sheetXML(s.rows)}));
+  // ZIP (stored)
+  const enc=new TextEncoder();
+  const recs=files.map(f=>({nameB:enc.encode(f.name),bytes:enc.encode(f.data)}));
+  const chunks=[],central=[];let offset=0;
+  recs.forEach(f=>{
+    const crc=crc32(f.bytes),size=f.bytes.length;
+    const local=new Uint8Array(30+f.nameB.length),dv=new DataView(local.buffer);
+    dv.setUint32(0,0x04034b50,true);dv.setUint16(4,20,true);dv.setUint16(6,0,true);dv.setUint16(8,0,true);
+    dv.setUint16(10,0,true);dv.setUint16(12,0x21,true);dv.setUint32(14,crc,true);dv.setUint32(18,size,true);dv.setUint32(22,size,true);
+    dv.setUint16(26,f.nameB.length,true);dv.setUint16(28,0,true);local.set(f.nameB,30);
+    chunks.push(local,f.bytes);
+    const cen=new Uint8Array(46+f.nameB.length),cv=new DataView(cen.buffer);
+    cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0,true);cv.setUint16(10,0,true);
+    cv.setUint16(12,0,true);cv.setUint16(14,0x21,true);cv.setUint32(16,crc,true);cv.setUint32(20,size,true);cv.setUint32(24,size,true);
+    cv.setUint16(28,f.nameB.length,true);cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);
+    cv.setUint32(38,0,true);cv.setUint32(42,offset,true);cen.set(f.nameB,46);
+    central.push(cen);offset+=local.length+f.bytes.length;
+  });
+  const centralStart=offset;let centralSize=0;central.forEach(c=>centralSize+=c.length);
+  const end=new Uint8Array(22),ev=new DataView(end.buffer);
+  ev.setUint32(0,0x06054b50,true);ev.setUint16(8,recs.length,true);ev.setUint16(10,recs.length,true);
+  ev.setUint32(12,centralSize,true);ev.setUint32(16,centralStart,true);
+  return new Blob([...chunks,...central,end],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function exportXLSX(){
+  const b=bau(),cur=af();
+  const lv=lvMatrix(),piv=pivotMatrix(),det=detailMatrix();
+  const blob=buildXLSX([
+    {name:"LV gesamt",rows:[lv.header,...lv.rows]},
+    {name:"Aufmaß je Raum",rows:[piv.header,...piv.rows]},
+    {name:"Aufmaß Details",rows:[det.header,...det.rows]}
+  ]);
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  const fnbase=b.name+" - "+(expAllAuf?"alle Aufmasse":cur.name);
+  a.href=url;a.download=(fnbase||"aufmass").replace(/[^\w äöüÄÖÜß-]+/g,"_")+".xlsx";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast("Excel-Datei exportiert (3 Blätter)");
+}
+
+/* ---- CSV (Kreuztabelle, ein Blatt) ---- */
+function csvCell(v){v=String(v==null?"":v);return /[;"\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function numDE(n){return n==null?"":Number(n).toLocaleString("de-DE",{useGrouping:false,maximumFractionDigits:3});}
+function exportCSV(){
+  const b=bau(),cur=af();
+  const {header,rows}=pivotMatrix();
+  const all=[header,...rows].map(r=>r.map(v=>v==null?"":(typeof v==="number"?numDE(v):v)));
+  const csv="\uFEFF"+all.map(r=>r.map(csvCell).join(";")).join("\r\n");
+  const fnbase=b.name+" - "+(expAllAuf?"alle Aufmasse":cur.name);
+  downloadFile(csv,(fnbase||"aufmass").replace(/[^\w äöüÄÖÜß-]+/g,"_")+".csv","text/csv;charset=utf-8");
+  toast("CSV exportiert");
+}
+function downloadFile(content,name,type){
+  const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+el("expCSV").onclick=exportCSV;
+el("expXLSX").onclick=exportXLSX;
+el("expPrint").onclick=()=>{renderExport();setTimeout(()=>window.print(),60);};
+el("expCopy").onclick=async()=>{
+  const txt=buildReportText();
+  try{await navigator.clipboard.writeText(txt);toast("In Zwischenablage kopiert");}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand("copy");toast("In Zwischenablage kopiert");}catch(_){toast("Kopieren nicht möglich");}
+    ta.remove();
+  }
+};
+
+/* ======================= Init ======================= */
+function renderAll(){
+  const steps=[renderProjekte,renderLV,refreshDatalists,()=>{afLvSelected=null;afIsNachtrag=false;afRoomsSelected.clear();},updateAfLvBtn,renderRoomChips,renderAuf,renderSearch];
+  for(const fn of steps){try{fn();}catch(e){console.error("renderAll:",e);}}
+}
+
+el("btnUndo").onclick=undo;
+el("btnRedo").onclick=redo;
+document.addEventListener("keydown",e=>{
+  if(!(e.metaKey||e.ctrlKey))return;
+  if(e.key.toLowerCase()!=="z"&&e.key.toLowerCase()!=="y")return;
+  const tag=(document.activeElement&&document.activeElement.tagName)||"";
+  if(/INPUT|TEXTAREA|SELECT/.test(tag))return; // native Undo im Feld zulassen
+  e.preventDefault();
+  if(e.key.toLowerCase()==="y"||(e.key.toLowerCase()==="z"&&e.shiftKey))redo();else undo();
+});
+
+/* Firebase/Cloud entfernt – App läuft rein lokal (IndexedDB). */
+
+function setStickyOffsets(){
+  try{
+    const h=document.querySelector("header.app"),n=document.querySelector("nav.tabs");
+    if(h)document.documentElement.style.setProperty("--h-header",h.offsetHeight+"px");
+    if(n)document.documentElement.style.setProperty("--h-nav",n.offsetHeight+"px");
+  }catch(e){}
+}
+window.addEventListener("resize",setStickyOffsets);
+window.addEventListener("orientationchange",()=>setTimeout(setStickyOffsets,200));
+
+/* Auto-Sicherung bei Seitenwechsel/Schließen (mobil zuverlässiger als beforeunload) */
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ saveNow(); makeBackup("automatisch (Seite verlassen)"); } });
+window.addEventListener("pagehide",()=>{ saveNow(); makeBackup("automatisch (Seite verlassen)"); });
+
+/* ---- Start: Daten aus IndexedDB laden, dann Oberfläche aufbauen ---- */
+(function boot(){
+  try{const bt=el("buildTag");if(bt)bt.textContent="Version "+APP_BUILD;}catch(e){}
+  idbGet("main").then(saved=>{
+    try{ DB = saved ? normalize(saved) : normalize(blankDB()); }
+    catch(e){ console.error(e); DB = normalize(blankDB()); }
+  }).catch(e=>{ console.error(e); DB = normalize(blankDB()); }).then(()=>{
+    try{renderAll();var _bm2=document.getElementById("_bootmark");if(_bm2)_bm2.remove();}
+    catch(e){console.error(e);var _bm3=document.getElementById("_bootmark");if(_bm3){_bm3.style.background="#b91c1c";_bm3.textContent="Aufbau-Fehler: "+((e&&e.message)||e);}}
+    try{setStickyOffsets();setTimeout(setStickyOffsets,300);}catch(e){}
+    try{histInit();}catch(e){console.error(e);}
+  });
+})();
+</script>
+</body>
+</html>
